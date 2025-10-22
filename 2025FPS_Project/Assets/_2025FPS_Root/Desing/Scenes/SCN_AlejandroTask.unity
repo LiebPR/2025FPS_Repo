@@ -1417,6 +1417,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PF_Player
       objectReference: {fileID: 0}
+    - target: {fileID: 2098807969975776716, guid: d9f39bc75809cfe4796ee2631fa5b7bc, type: 3}
+      propertyPath: m_NotificationBehavior
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 4159445354567149422, guid: d9f39bc75809cfe4796ee2631fa5b7bc, type: 3}
       propertyPath: m_Enabled
       value: 1

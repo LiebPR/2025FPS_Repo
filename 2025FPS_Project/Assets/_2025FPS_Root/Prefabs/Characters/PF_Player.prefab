@@ -185,6 +185,7 @@ GameObject:
   - component: {fileID: 8005873583484721293}
   - component: {fileID: 8061097929383227906}
   - component: {fileID: 4159445354567149422}
+  - component: {fileID: 1927863503620718146}
   m_Layer: 7
   m_Name: PF_Player
   m_TagString: Player
@@ -272,7 +273,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Actions: {fileID: -944628639613478452, guid: f83c11695eb730e4fba1b58ed4728faf, type: 3}
-  m_NotificationBehavior: 2
+  m_NotificationBehavior: 3
   m_UIInputModule: {fileID: 0}
   m_DeviceLostEvent:
     m_PersistentCalls:
@@ -427,6 +428,10 @@ MonoBehaviour:
     m_Bits: 8
   isSprinting: 0
   isCrouching: 0
+  playerCamera: {fileID: 6638849855594031741}
+  normalFOV: 60
+  sprintFOV: 75
+  fovChangeSpeed: 8
 --- !u!95 &8061097929383227906
 Animator:
   serializedVersion: 7
@@ -474,7 +479,18 @@ MonoBehaviour:
   allowButtonHold: 0
   ammoSize: 30
   bulletsPerTap: 1
-  impactEffect: {fileID: 0}
+--- !u!114 &1927863503620718146
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1801987506058558577}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc7f6f7747dbd1844ae55dd5ca4dc386, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7044904031915176628
 GameObject:
   m_ObjectHideFlags: 0

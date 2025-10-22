@@ -24,16 +24,23 @@ public class FPSController : MonoBehaviour
     [Header("Player State Bools")]
     [SerializeField] bool isSprinting;
     [SerializeField] bool isCrouching;
-    #endregion
 
-    //Object References
-    Rigidbody playerRb;
-    Animator anim;
+    [Header("FOV Settings")]
+    [SerializeField] Camera playerCamera;
+    [SerializeField] float normalFOV = 60f;
+    [SerializeField] float sprintFOV = 75f;
+    [SerializeField] float fovChangeSpeed = 8f;
 
     //Input Variables
     Vector2 moveInput;
     Vector2 lookInput;
     float lookRotation;
+    #endregion
+
+    #region Referencias
+    Rigidbody playerRb;
+    Animator anim;
+    #endregion
 
     private void Awake()
     {
@@ -57,6 +64,8 @@ public class FPSController : MonoBehaviour
         isGrounded = Physics.CheckSphere(groundCheck.transform.position, groundCheckRadius, groundLayer);
         //Debug ray: visible only in Scene
         Debug.DrawRay(camHolder.transform.position, camHolder.transform.forward * 100f, Color.red);
+
+        UpdateFOV();
 
     }
 
@@ -88,7 +97,12 @@ public class FPSController : MonoBehaviour
         playerRb.AddForce(velocityChange, ForceMode.VelocityChange);
     }
 
+    void Jump()
+    {
+        if (isGrounded) playerRb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+    }
 
+    #region Camera
     void CameraLook()
     {
         //Horizontal rotation (player body)
@@ -99,10 +113,14 @@ public class FPSController : MonoBehaviour
         camHolder.transform.localEulerAngles = new Vector3(lookRotation, 0f, 0f);
     }
 
-    void Jump()
+    void UpdateFOV()
     {
-        if (isGrounded) playerRb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+        if (playerCamera == null) return;
+        
+        float targetFOV = isSprinting ? sprintFOV : normalFOV;
+        playerCamera.fieldOfView = Mathf.Lerp(playerCamera.fieldOfView, targetFOV, Time.deltaTime * fovChangeSpeed);
     }
+    #endregion
 
     #region Input Methods
     public void OnMove(InputAction.CallbackContext ctx)
