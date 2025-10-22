@@ -26,7 +26,7 @@ public class GunSystem : MonoBehaviour
     int bulletsLeft; //Cantidad de balas dentro del cargador actual
 
     [Header("Feedback References")]
-    [SerializeField] GameObject impactEffect; //Referencia al VFX de impacto de bala
+    //[SerializeField] GameObject impactEffect; //Referencia al VFX de impacto de bala
 
     //Bools de estado
     bool shooting; //Indica que estamos disparando
@@ -44,7 +44,7 @@ public class GunSystem : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        impactEffect.SetActive(false); //Apaga el efecto de impacto al iniciar el juego
+        //impactEffect.SetActive(false); //Apaga el efecto de impacto al iniciar el juego
     }
 
     // Update is called once per frame
