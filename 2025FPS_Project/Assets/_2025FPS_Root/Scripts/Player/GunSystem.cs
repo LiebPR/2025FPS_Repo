@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Windows;
 
 public class GunSystem : MonoBehaviour
 {
@@ -13,12 +14,20 @@ public class GunSystem : MonoBehaviour
     
 
     [Header("Weapon Parameters")]
-    [SerializeField] int damage = 10; //Daño del arma
-    [SerializeField] float range = 100f; //Distancia de disparo
-    [SerializeField] float spread = 0; //Dispersión de disparo
-    [SerializeField] float shootingCooldown = 0.2f; //Tiempo entre disparos
-    [SerializeField] float reloadTime = 1.5f; //Tiempo entre disparos
-    [SerializeField] bool allowButtonHold = false; //Si se dispara click a click o por mantener
+    [SerializeField] int damage = 10; //daño del arma
+    [SerializeField] float range = 100f; //distancia de disparo
+    [SerializeField] float baseSpreadAngle = 1f; //dispersión base en grados
+    [SerializeField] float moveSpreadMultiplier = 1.5f; //aumento de dispersión al moverse
+    [SerializeField] float sprintSpreadMultiplier = 2f; //aumento de dispersión al moverse
+    [SerializeField] float jumpSpreadMultiplier = 2.5f; //aumento de dispersión al saltar
+    [SerializeField] float shootingCooldown = 0.2f; //tiempo entre disparos
+    [SerializeField] float reloadTime = 1.5f; //tiempo entre disparos
+    [SerializeField] bool allowButtonHold = false; //si se dispara click a click o por mantener
+
+    [Header("Recoil Settings")]
+    [SerializeField] float recoilAmount = 2f; //Grados que la camara subirá
+    [SerializeField] float recoilSpeed = 10f; //Velocidad de subida del recoil
+    [SerializeField] float recoilRecovery = 5f; //Velocidad a la que vuelve a la posición original
 
     [Header("Bullet Management")]
     [SerializeField] int ammoSize = 30; //Cantidad max de balas por cargador
@@ -33,21 +42,39 @@ public class GunSystem : MonoBehaviour
     bool canShoot; //Indica que en este momento del juego se puede disparar
     bool reloading; //Indica si estamos en proceso de recarga
 
+    Coroutine recoilCoroutine;
+    #endregion
+
+    #region References
+    FPSController playerController;
     #endregion
 
     private void Awake()
     {
+        playerController = GetComponent<FPSController>();
         bulletsLeft = ammoSize; //Al inicio de la partida, tenemos cargador lleno
         canShoot = true;
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    #region Input Event Suscription
+    private void OnEnable()
+    {
+        InputManager.OnShootEvent += HandleShoot;
+        InputManager.OnReloadEvent += HandleReload;
+    }
+
+    private void OnDisable()
+    {
+        InputManager.OnShootEvent -= HandleShoot;
+        InputManager.OnReloadEvent -= HandleReload;
+    }
+    #endregion
+
     void Start()
     {
         //impactEffect.SetActive(false); //Apaga el efecto de impacto al iniciar el juego
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (canShoot && shooting && !reloading && bulletsLeft > 0)
@@ -57,6 +84,7 @@ public class GunSystem : MonoBehaviour
         }
     }
 
+    #region Shoot
     IEnumerator ShootRoutine()
     {
         canShoot = false; //Previene la acumulación por frame de disparos
@@ -79,9 +107,13 @@ public class GunSystem : MonoBehaviour
         //AQUÍ SE DEFINE EL DISPARO POR RAYCAST
 
         //Almacenar la dirección del disparo
-        Vector3 direction = fpsCam.transform.forward;
-        direction.x += Random.Range(-spread, spread); //Esto añade una dispersión aleatoria en caso de que no valga 0
-        direction.y += Random.Range(-spread, spread);
+        Vector3 direction = fpsCam.transform.forward; //dirección base(frontal  de la cámara)
+        
+        //Calcular el spread actual según el estado del jugador
+        float currentSpread = GetCurrentSpread();
+
+        //Aplicar dispersión angular realista
+        direction = Quaternion.Euler(Random.Range(-currentSpread, currentSpread), Random.Range(-currentSpread, currentSpread), 0) * direction;
 
         //DECLARACIÓN DEL RAYCAST
         //Physics.Raycast(Origen del rayo, dirección, almacén de info de impacto, longitud del rayo, layer a la que impacta (opcional)
@@ -97,9 +129,70 @@ public class GunSystem : MonoBehaviour
             }
         }
 
+        ApplyRecoil();
+    }
+    #endregion
 
+    #region Spread
+    float GetCurrentSpread()
+    {
+        float currentSpread = baseSpreadAngle;
+
+        if(playerController == null)
+            return currentSpread;
+
+        //Multiplicadores de estado
+        if (playerController.IsSprinting)
+            currentSpread *= sprintSpreadMultiplier;
+        else if (!playerController.IsCrouching)
+            currentSpread *= 0.75f; //más precisión agachado
+        else if (!playerController.IsGrounded)
+            currentSpread *= jumpSpreadMultiplier;
+        else if (playerController.HasMovementInput())
+            currentSpread *= moveSpreadMultiplier;
+
+        return currentSpread;
+    }
+    #endregion
+
+    #region Recoil
+    public void ApplyRecoil()
+    {
+        if(recoilCoroutine != null)
+            StopCoroutine(recoilCoroutine);
+        recoilCoroutine = StartCoroutine(RecoilRoutine());
     }
 
+    IEnumerator RecoilRoutine()
+    {
+        Vector3 originalRotation = fpsCam.transform.localEulerAngles;
+        float targetX = originalRotation.x - recoilAmount;
+
+        // Ajuste para evitar overflow
+        if (targetX < 0) targetX += 360f;
+
+        float velocity = 0f;
+
+        // Subida suave del recoil
+        while (Mathf.Abs(Mathf.DeltaAngle(fpsCam.transform.localEulerAngles.x, targetX)) > 0.01f)
+        {
+            float x = Mathf.SmoothDampAngle(fpsCam.transform.localEulerAngles.x, targetX, ref velocity, 1f / recoilSpeed);
+            fpsCam.transform.localEulerAngles = new Vector3(x, fpsCam.transform.localEulerAngles.y, fpsCam.transform.localEulerAngles.z);
+            yield return null;
+        }
+
+        // Recuperación suave a la posición original
+        velocity = 0f;
+        while (Mathf.Abs(Mathf.DeltaAngle(fpsCam.transform.localEulerAngles.x, originalRotation.x)) > 0.01f)
+        {
+            float x = Mathf.SmoothDampAngle(fpsCam.transform.localEulerAngles.x, originalRotation.x, ref velocity, 1f / recoilRecovery);
+            fpsCam.transform.localEulerAngles = new Vector3(x, fpsCam.transform.localEulerAngles.y, fpsCam.transform.localEulerAngles.z);
+            yield return null;
+        }
+    }
+    #endregion
+
+    #region Reload
     void Reload()
     {
         if (bulletsLeft < ammoSize && !reloading)
@@ -116,24 +209,17 @@ public class GunSystem : MonoBehaviour
         bulletsLeft = ammoSize;
         reloading = false;
     }
+    #endregion
 
-    #region Input Methods
-    public void OnShoot(InputAction.CallbackContext ctx)
+    #region Inputs Handlers
+    void HandleShoot()
     {
-        if (allowButtonHold)
-        {
-            shooting = ctx.ReadValueAsButton();
-        }
-        else
-        {
-            if (ctx.performed) shooting = true;
-        }
-    }
-    public void OnReload(InputAction.CallbackContext ctx)
-    {
-        if (ctx.performed) Reload();
+        shooting = true;
     }
 
-
+    void HandleReload()
+    {
+        Reload();
+    }
     #endregion
 }

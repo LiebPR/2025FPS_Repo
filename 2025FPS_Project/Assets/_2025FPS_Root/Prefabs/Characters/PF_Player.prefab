@@ -163,7 +163,7 @@ Transform:
   m_GameObject: {fileID: 1375938430360398148}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.313, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -473,10 +473,16 @@ MonoBehaviour:
     m_Bits: 64
   damage: 10
   range: 100
-  spread: 0
-  shootingCooldown: 0.2
-  reloadTime: 1.5
+  baseSpreadAngle: 0.5
+  moveSpreadMultiplier: 1
+  sprintSpreadMultiplier: 2
+  jumpSpreadMultiplier: 2.5
+  shootingCooldown: 1
+  reloadTime: 0.1
   allowButtonHold: 0
+  recoilAmount: 5
+  recoilSpeed: 9
+  recoilRecovery: 10
   ammoSize: 30
   bulletsPerTap: 1
 --- !u!114 &1927863503620718146
@@ -488,7 +494,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1801987506058558577}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cc7f6f7747dbd1844ae55dd5ca4dc386, type: 3}
+  m_Script: {fileID: 11500000, guid: 6cdd1f29a4f85464180bca5a62634ddc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &7044904031915176628

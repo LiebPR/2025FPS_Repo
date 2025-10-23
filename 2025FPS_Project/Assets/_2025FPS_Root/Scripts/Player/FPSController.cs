@@ -37,9 +37,15 @@ public class FPSController : MonoBehaviour
     float lookRotation;
     #endregion
 
-    #region Referencias
+    #region References
     Rigidbody playerRb;
     Animator anim;
+    #endregion
+
+    #region Getters
+    public bool IsSprinting => isSprinting;
+    public bool IsCrouching => isCrouching;
+    public bool IsGrounded => isGrounded;
     #endregion
 
     private void Awake()
@@ -48,8 +54,25 @@ public class FPSController : MonoBehaviour
         anim = GetComponent<Animator>();
     }
 
+    #region Input Events Suscription
+    private void OnEnable()
+    {
+        InputManager.OnMoveEvent += HandleMove;
+        InputManager.OnLookEvent += HandleLook;
+        InputManager.OnJumpEvent += HandleJump;
+        InputManager.OnCrouchEvent += HandleCrouch;
+        InputManager.OnSprintEvent += HandleSprint;
+    }
+    private void OnDisable()
+    {
+        InputManager.OnMoveEvent -= HandleMove;
+        InputManager.OnLookEvent -= HandleLook;
+        InputManager.OnJumpEvent -= HandleJump;
+        InputManager.OnCrouchEvent -= HandleCrouch;
+        InputManager.OnSprintEvent -= HandleSprint;
+    }
+    #endregion
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         //Lock cursor
@@ -57,7 +80,7 @@ public class FPSController : MonoBehaviour
         Cursor.visible = false;
     }
 
-    // Update is called once per frame
+    
     void Update()
     {
         //Groundcheck
@@ -122,36 +145,39 @@ public class FPSController : MonoBehaviour
     }
     #endregion
 
-    #region Input Methods
-    public void OnMove(InputAction.CallbackContext ctx)
+    #region Auxiliar
+    public bool HasMovementInput()
     {
-        moveInput = ctx.ReadValue<Vector2>();
+        return moveInput.sqrMagnitude > 0.01f;
+    }
+    #endregion
+
+    #region Input Handlers
+    public void HandleMove(Vector2 input)
+    {
+        moveInput = input;
     }
 
-    public void OnLook(InputAction.CallbackContext ctx)
+    public void HandleLook(Vector2 input)
     {
-        lookInput = ctx.ReadValue<Vector2>();
+        lookInput = input;
     }
 
-    public void OnJump(InputAction.CallbackContext ctx)
+    public void HandleJump()
     {
-        if (ctx.performed) Jump();
+        Jump();
     }
 
-    public void OnCrouch(InputAction.CallbackContext ctx)
+    public void HandleCrouch()
     {
-        if (ctx.performed)
-        {
-            isCrouching = !isCrouching;
-            anim.SetBool("isCrouching", isCrouching);
-            //Añadir cambio animación
-        }
+        isCrouching = !isCrouching;
+        anim.SetBool("isCrouching", isCrouching);
     }
 
-    public void OnSprint(InputAction.CallbackContext ctx)
+    public void HandleSprint(bool isPressed)
     {
-        if (ctx.performed && !isCrouching) isSprinting = true;
-        if (ctx.canceled) isSprinting = false;
+        if (isCrouching && isPressed) return;
+        isSprinting = isPressed;
     }
     #endregion
 }
