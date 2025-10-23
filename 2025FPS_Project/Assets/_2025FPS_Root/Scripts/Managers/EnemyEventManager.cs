@@ -5,6 +5,7 @@ public class EnemyEventManager : MonoBehaviour
     #region Referencias
     EnemyStateMachine fsm;
     VisionSystem visionSystem;
+    ListenSystem listenSystem;
     EnemyMovement movement;
     #endregion
 
@@ -12,6 +13,7 @@ public class EnemyEventManager : MonoBehaviour
     {
         fsm = GetComponent<EnemyStateMachine>();
         visionSystem = GetComponent<VisionSystem>();
+        listenSystem = GetComponent<ListenSystem>();
         movement = GetComponent<EnemyMovement>();
     }
 
@@ -20,6 +22,11 @@ public class EnemyEventManager : MonoBehaviour
         //Vision System
         visionSystem.OnTargetSee += HandleTargetSee;
         visionSystem.OnTargetLose += HandleTargetLost;
+
+        //Listen System
+        listenSystem.OnListenPlayer += HandleListen;
+        listenSystem.OnDontListenAnything += HandleDontListen;
+        listenSystem.OnBulletImpact += HandleBulletImpact;
 
         //Movement
         movement.OnIdleEnter += HandleIdleEnter;
@@ -32,14 +39,34 @@ public class EnemyEventManager : MonoBehaviour
         visionSystem.OnTargetSee += HandleTargetSee;
         visionSystem.OnTargetLose += HandleTargetLost;
 
+        //Listen System
+        listenSystem.OnListenPlayer -= HandleListen;
+        listenSystem.OnDontListenAnything -= HandleDontListen;
+        listenSystem.OnBulletImpact -= HandleBulletImpact;
+
         //Movement
         movement.OnIdleEnter -= HandleIdleEnter;
         movement.OnIdleExit -= HandleIdleExit;
     }
 
-    #region Vsion Hanlders
+    #region Vision Hanlders
     void HandleTargetSee(Transform target) => fsm.OnChase();
     void HandleTargetLost(Transform target) => fsm.OnPatrol();
+    #endregion
+
+    #region Listen Handlers
+    void HandleListen(Vector3 position)
+    {
+        fsm.OnChase();
+    }
+    void HandleDontListen()
+    {
+        fsm.OnPatrol();
+    }
+    void HandleBulletImpact(Vector3 position)
+    {
+        fsm.OnPatrol();
+    }
     #endregion
 
     #region Movement Handlers

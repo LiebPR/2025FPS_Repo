@@ -425,7 +425,7 @@ MonoBehaviour:
   groundCheckRadius: 0.3
   groundLayer:
     serializedVersion: 2
-    m_Bits: 8
+    m_Bits: 256
   isSprinting: 0
   isCrouching: 0
   playerCamera: {fileID: 6638849855594031741}
@@ -470,7 +470,7 @@ MonoBehaviour:
   shootPoint: {fileID: 0}
   impactLayer:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 72
   damage: 10
   range: 100
   baseSpreadAngle: 0.5

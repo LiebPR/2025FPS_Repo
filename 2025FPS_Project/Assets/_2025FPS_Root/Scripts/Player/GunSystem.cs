@@ -37,12 +37,19 @@ public class GunSystem : MonoBehaviour
     [Header("Feedback References")]
     //[SerializeField] GameObject impactEffect; //Referencia al VFX de impacto de bala
 
+    Vector3 lastHitPoint; // ultima posición
+
     //Bools de estado
     bool shooting; //Indica que estamos disparando
     bool canShoot; //Indica que en este momento del juego se puede disparar
     bool reloading; //Indica si estamos en proceso de recarga
 
     Coroutine recoilCoroutine;
+    #endregion
+
+    #region Getters
+    public bool IsShooting => shooting;
+    public Vector3 LastHitPoint => lastHitPoint;
     #endregion
 
     #region References

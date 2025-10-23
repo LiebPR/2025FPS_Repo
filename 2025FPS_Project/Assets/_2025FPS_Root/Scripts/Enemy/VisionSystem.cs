@@ -1,11 +1,11 @@
-using System;
+Ôªøusing System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
 
 /// <summary>
-/// VisionSystem: Detecta objetos de un radio y ·ngulo de visiÛn.
-/// Dispara eventos especÌficos para el jugador y mantiene la ˙ltima posiciÛn conocida.
+/// VisionSystem: Detecta objetos de un radio y √°ngulo de visi√≥n.
+/// Dispara eventos espec√≠ficos para el jugador y mantiene la √∫ltima posici√≥n conocida.
 /// </summary>
 public class VisionSystem : MonoBehaviour
 {
@@ -22,6 +22,7 @@ public class VisionSystem : MonoBehaviour
 
     bool canSeeTarget;
     bool isPlayerInPerceptionArea;
+    bool visionEnable = true; 
 
     RaycastHit rayObstacleDetector;
     #endregion
@@ -33,7 +34,7 @@ public class VisionSystem : MonoBehaviour
 
     #region Getters
     public Transform Target {  get; private set; } //player
-    public Vector3 LastKnownPosition { get; private set; } //˙ltima posiciÛn conocida del player
+    public Vector3 LastKnownPosition { get; private set; } //√∫ltima posici√≥n conocida del player
     public bool CanSeeTarget => canSeeTarget; //informa del si es true or false
     #endregion
 
@@ -48,7 +49,7 @@ public class VisionSystem : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         stateMachine = GetComponent<EnemyStateMachine>();
 
-        FindPlayer(); //busca al player autom·ticamente
+        FindPlayer(); //busca al player autom√°ticamente
     }
 
     private void Update()
@@ -65,9 +66,9 @@ public class VisionSystem : MonoBehaviour
         Vector3 dirToTarget = (Target.position - visionPoint.position).normalized;
         float distToTarget = Vector3.Distance(visionPoint.position, Target.position);
 
-        bool obstacle = CheckObstacle(dirToTarget, distToTarget, out rayObstacleDetector);
         bool inCone = CheckCone(dirToTarget, distToTarget);
         bool inPerceptionArea = PerceptionArea();
+        bool obstacle = CheckObstacle(dirToTarget, distToTarget, out rayObstacleDetector);
 
         UpdateVisionState(inCone, obstacle, inPerceptionArea);
     }
@@ -76,7 +77,7 @@ public class VisionSystem : MonoBehaviour
     {
         bool previusSee = canSeeTarget;
 
-        //DetecciÛn Frontal
+        //Detecci√≥n Frontal
         if(inCone && !obstacle)
         {
             lostTimer = lostDelay;
@@ -92,7 +93,7 @@ public class VisionSystem : MonoBehaviour
             }
         }
 
-        //PercepciÛn Cercana
+        //Percepci√≥n Cercana
         if(inPerceptionArea && !canSeeTarget)
         {
             if (!isPlayerInPerceptionArea)
@@ -131,29 +132,35 @@ public class VisionSystem : MonoBehaviour
     #region Vision Detectors
 
     //OBSTACLE DETECTOR
-    //Detecta si hay un obst·culo entre el enemigo y el jugador. 
+    //Detecta si hay un obst√°culo entre el enemigo y el jugador. 
     bool CheckObstacle(Vector3 dirToTarget, float distToTarget, out RaycastHit hit)
     {
-        //Raycast hasta la posiciÛn exacta del player
+        //Raycast hasta la posici√≥n exacta del player
         bool hasHit = Physics.Raycast(visionPoint.position, dirToTarget, out hit, distToTarget, enemyData.obstacleMask);
         return hasHit;
     }
 
+    public void EnableConeVision(bool enable)
+    {
+        visionEnable = enable;
+    }
+
     //CONO
-    //Verifica si el juagdor est· dentro del ·ngulo de vision del enemigo.
+    //Verifica si el juagdor est√° dentro del √°ngulo de vision del enemigo.
     bool CheckCone(Vector3 dirToTarget, float distanceToTarget)
     {
-        if (distanceToTarget > enemyData.visionRadius) return false; //fuera del rango m·ximo
+        if (!visionEnable) return false;
+        if (distanceToTarget > enemyData.visionRadius) return false; //fuera del rango m√°ximo
 
-        //Claculamos el ·ngulo entre el frente del enemigo y el objetivo
+        //Claculamos el √°ngulo entre el frente del enemigo y el objetivo
         float angle = Vector3.Angle(visionPoint.transform.forward, dirToTarget);
 
-        //Comprobamos si el jugador est· dentro del ·ngulo de visiÛn
+        //Comprobamos si el jugador est√° dentro del √°ngulo de visi√≥n
         return angle < enemyData.visionAngle * 0.5f;
     }
 
     //PERCEPTION AREA
-    //Detecta si el jugador est· cerca del enemigo
+    //Detecta si el jugador est√° cerca del enemigo
     bool PerceptionArea()
     {
         if(Target == null) return false;
@@ -165,13 +172,13 @@ public class VisionSystem : MonoBehaviour
         Collider hit = hits.Length > 0 ? hits[0] : null; 
         if (hit != null && hit.transform == Target)
         {
-            //Verificamos que no haya obst·culos usando el raycast 3D existente
+            //Verificamos que no haya obst√°culos usando el raycast 3D existente
             Vector3 dirToTarget = (Target.position - visionPoint.position).normalized;
             float distanceToTarget = Vector3.Distance(visionPoint.position, Target.position);
 
             if(!CheckObstacle(dirToTarget, distanceToTarget, out _))
             {
-                //Se respeta la lÛgica de tiempo para "darse cuenta"
+                //Se respeta la l√≥gica de tiempo para "darse cuenta"
                 if (!canSeeTarget)
                 {
                     perceptionTimer -= Time.deltaTime;
@@ -186,7 +193,7 @@ public class VisionSystem : MonoBehaviour
             }
         }
 
-        //Si hay detecciÛn v·lida, reiniciamos el temporizador
+        //Si hay detecci√≥n v√°lida, reiniciamos el temporizador
         perceptionTimer = perceptionDelay;
         return false;
     }
@@ -207,31 +214,39 @@ public class VisionSystem : MonoBehaviour
     {
         if (visionPoint == null) return;
 
-        Gizmos.color = Color.yellow;
+        // ----- COLOR BASE SEG√öN ESTADO -----
+        Color baseColor;
+
+        if (!visionEnable)
+            baseColor = new Color(1f, 1f, 0f, 0.2f); // apagado ‚Üí amarillo opaco
+        else if (canSeeTarget)
+            baseColor = Color.green; // viendo al jugador
+        else
+            baseColor = Color.yellow; // activo pero sin ver
+
+        // Radio de visi√≥n
+        Gizmos.color = baseColor;
         Gizmos.DrawWireSphere(visionPoint.position, enemyData.visionRadius);
 
-        Gizmos.color = Color.cyan;
+        // √Årea de percepci√≥n
+        Gizmos.color = new Color(0, 1, 1, visionEnable ? 1f : 0.2f);
         Gizmos.DrawWireSphere(visionPoint.position, enemyData.perceptionRadius);
 
-        //VisualizaciÛn del cono de visiÛn
+        // Cono visual
         Vector3 rightDir = Quaternion.Euler(0, enemyData.visionAngle * 0.5f, 0) * visionPoint.forward;
         Vector3 leftDir = Quaternion.Euler(0, -enemyData.visionAngle * 0.5f, 0) * visionPoint.forward;
 
-        Gizmos.color = Color.yellow;
+        Gizmos.color = baseColor;
         Gizmos.DrawLine(visionPoint.position, visionPoint.position + rightDir * enemyData.visionRadius);
         Gizmos.DrawLine(visionPoint.position, visionPoint.position + leftDir * enemyData.visionRadius);
 
-        //Raycast de obst·culos
-        if(Target != null)
+        // Raycast de obst√°culos
+        if (Target != null)
         {
             Gizmos.color = rayObstacleDetector.collider != null ? Color.magenta : Color.red;
             Vector3 rayEnd = rayObstacleDetector.collider != null ? rayObstacleDetector.point : Target.position;
             Gizmos.DrawLine(visionPoint.position, rayEnd);
         }
-
-        //Estado general
-        Gizmos.color = canSeeTarget ? Color.green : new Color(1, 0.5f, 0);
-        Gizmos.DrawWireSphere(visionPoint.position, enemyData.visionRadius);
     }
     #endregion
 }
