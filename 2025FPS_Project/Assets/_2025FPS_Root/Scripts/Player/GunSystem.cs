@@ -120,16 +120,24 @@ public class GunSystem : MonoBehaviour
         float currentSpread = GetCurrentSpread();
 
         //Aplicar dispersión angular realista
-        direction = Quaternion.Euler(Random.Range(-currentSpread, currentSpread), Random.Range(-currentSpread, currentSpread), 0) * direction;
+        float spreadX = Random.Range(-currentSpread, currentSpread);
+        float spreadY = Random.Range(-currentSpread, currentSpread);
+
+        Vector3 spreadDirection = fpsCam.transform.forward;
+        spreadDirection += fpsCam.transform.right * Mathf.Tan(spreadX * Mathf.Deg2Rad);
+        spreadDirection += fpsCam.transform.up * Mathf.Tan(spreadY * Mathf.Deg2Rad);
+        spreadDirection.Normalize();
+
+        Debug.DrawRay(fpsCam.transform.position, spreadDirection * range, Color.red, 1f);
 
         //DECLARACIÓN DEL RAYCAST
         //Physics.Raycast(Origen del rayo, dirección, almacén de info de impacto, longitud del rayo, layer a la que impacta (opcional)
-        if (Physics.Raycast(fpsCam.transform.position, direction, out hit, range, impactLayer))
+        if (Physics.Raycast(fpsCam.transform.position, spreadDirection, out hit, range, impactLayer))
         {
             //AQUI PUEDO CODEAR TODOS LOS EFECTOS QUE QUIERO PARA MI INTERACCIÓN
-            Debug.Log(hit.collider.name);
+            Debug.Log("Disparo hacia: " + hit.point + " | Colision con: " + hit.collider.name);
 
-            if (hit.collider.TryGetComponent(out EnemyHealth health))
+            if (hit.collider.TryGetComponent(out Health health))
             {
                 //COMUNICACIÖN ENTRE: OBJETO QUE DISPARA + RAYO + OBJETO QUE RECIBE
                 health.TakeDamage(damage);
@@ -145,18 +153,20 @@ public class GunSystem : MonoBehaviour
     {
         float currentSpread = baseSpreadAngle;
 
-        if(playerController == null)
+        if (playerController == null)
             return currentSpread;
 
-        //Multiplicadores de estado
+        // Multiplicadores acumulativos según estado
+        if (!playerController.IsGrounded)
+            currentSpread *= jumpSpreadMultiplier;
+
         if (playerController.IsSprinting)
             currentSpread *= sprintSpreadMultiplier;
-        else if (!playerController.IsCrouching)
-            currentSpread *= 0.75f; //más precisión agachado
-        else if (!playerController.IsGrounded)
-            currentSpread *= jumpSpreadMultiplier;
         else if (playerController.HasMovementInput())
             currentSpread *= moveSpreadMultiplier;
+
+        if (playerController.IsCrouching)
+            currentSpread *= 0.75f; // más precisión al estar agachado
 
         return currentSpread;
     }

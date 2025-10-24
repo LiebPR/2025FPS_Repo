@@ -181,10 +181,11 @@ GameObject:
   - component: {fileID: 7933888498674282356}
   - component: {fileID: 5643461800156234538}
   - component: {fileID: 8712837974688154042}
-  - component: {fileID: 2098807969975776716}
   - component: {fileID: 8005873583484721293}
-  - component: {fileID: 8061097929383227906}
   - component: {fileID: 4159445354567149422}
+  - component: {fileID: 4789075039261063539}
+  - component: {fileID: 8061097929383227906}
+  - component: {fileID: 2098807969975776716}
   - component: {fileID: 1927863503620718146}
   m_Layer: 7
   m_Name: PF_Player
@@ -260,6 +261,105 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 1
+--- !u!114 &8005873583484721293
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1801987506058558577}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac78900e4947f4448b6db4c8d57a57e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  camHolder: {fileID: 1375938430360398148}
+  speed: 5
+  sprintSpeed: 8
+  crouchSpeed: 3
+  maxForce: 1
+  sensitivity: 0.1
+  jumpForce: 6
+  groundCheck: {fileID: 7044904031915176628}
+  groundCheckRadius: 0.3
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 256
+  isSprinting: 0
+  isCrouching: 0
+  playerCamera: {fileID: 6638849855594031741}
+  normalFOV: 60
+  sprintFOV: 75
+  fovChangeSpeed: 8
+--- !u!114 &4159445354567149422
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1801987506058558577}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c48589c6342d25246ac400cca418f728, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fpsCam: {fileID: 6638849855594031741}
+  shootPoint: {fileID: 0}
+  impactLayer:
+    serializedVersion: 2
+    m_Bits: 72
+  damage: 30
+  range: 100
+  baseSpreadAngle: 0.5
+  moveSpreadMultiplier: 2
+  sprintSpreadMultiplier: 2.5
+  jumpSpreadMultiplier: 4
+  shootingCooldown: 1
+  reloadTime: 0.1
+  allowButtonHold: 0
+  recoilAmount: 5
+  recoilSpeed: 9
+  recoilRecovery: 10
+  ammoSize: 30
+  bulletsPerTap: 1
+--- !u!114 &4789075039261063539
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1801987506058558577}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4a6824aaa608344da8ad3484a77ca95, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isPlayer: 1
+  maxHealth: 100
+  health: 0
+  damagedMat: {fileID: 0}
+--- !u!95 &8061097929383227906
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1801987506058558577}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 9a4107aa48255654ebc4b9af58671584, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!114 &2098807969975776716
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -402,89 +502,6 @@ MonoBehaviour:
   m_DefaultActionMap: Gameplay
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
---- !u!114 &8005873583484721293
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1801987506058558577}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac78900e4947f4448b6db4c8d57a57e0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  camHolder: {fileID: 1375938430360398148}
-  speed: 5
-  sprintSpeed: 8
-  crouchSpeed: 3
-  maxForce: 1
-  sensitivity: 0.1
-  jumpForce: 5
-  groundCheck: {fileID: 7044904031915176628}
-  groundCheckRadius: 0.3
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 256
-  isSprinting: 0
-  isCrouching: 0
-  playerCamera: {fileID: 6638849855594031741}
-  normalFOV: 60
-  sprintFOV: 75
-  fovChangeSpeed: 8
---- !u!95 &8061097929383227906
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1801987506058558577}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 9a4107aa48255654ebc4b9af58671584, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
---- !u!114 &4159445354567149422
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1801987506058558577}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c48589c6342d25246ac400cca418f728, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  fpsCam: {fileID: 6638849855594031741}
-  shootPoint: {fileID: 0}
-  impactLayer:
-    serializedVersion: 2
-    m_Bits: 72
-  damage: 10
-  range: 100
-  baseSpreadAngle: 0.5
-  moveSpreadMultiplier: 1
-  sprintSpreadMultiplier: 2
-  jumpSpreadMultiplier: 2.5
-  shootingCooldown: 1
-  reloadTime: 0.1
-  allowButtonHold: 0
-  recoilAmount: 5
-  recoilSpeed: 9
-  recoilRecovery: 10
-  ammoSize: 30
-  bulletsPerTap: 1
 --- !u!114 &1927863503620718146
 MonoBehaviour:
   m_ObjectHideFlags: 0

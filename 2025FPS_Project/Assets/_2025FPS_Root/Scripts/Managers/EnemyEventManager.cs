@@ -26,7 +26,7 @@ public class EnemyEventManager : MonoBehaviour
         //Listen System
         listenSystem.OnListenPlayer += HandleListen;
         listenSystem.OnDontListenAnything += HandleDontListen;
-        listenSystem.OnBulletImpact += HandleBulletImpact;
+        //listenSystem.OnBulletImpact += HandleBulletImpact;
 
         //Movement
         movement.OnIdleEnter += HandleIdleEnter;
@@ -42,7 +42,7 @@ public class EnemyEventManager : MonoBehaviour
         //Listen System
         listenSystem.OnListenPlayer -= HandleListen;
         listenSystem.OnDontListenAnything -= HandleDontListen;
-        listenSystem.OnBulletImpact -= HandleBulletImpact;
+        //listenSystem.OnBulletImpact -= HandleBulletImpact;
 
         //Movement
         movement.OnIdleEnter -= HandleIdleEnter;

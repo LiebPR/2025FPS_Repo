@@ -16,7 +16,7 @@ public class ListenSystem : MonoBehaviour
 
     #region Eventos
     public event Action<Vector3> OnListenPlayer; //cuando se escucha al jugador
-    public event Action<Vector3> OnBulletImpact; //cuando detecta un jugador
+    //public event Action<Vector3> OnBulletImpact; //cuando detecta un jugador
     public event Action OnDontListenAnything; //no escucha nada
     #endregion
 
