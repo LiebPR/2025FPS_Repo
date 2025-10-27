@@ -17,6 +17,8 @@ public class VisionSystem : MonoBehaviour
     [SerializeField] float lostDelay = 0.5f;
     [SerializeField] Transform visionPoint;
 
+    [SerializeField] float stopAreaRadius = 2f; //radio del área donde el enemigo se detiene
+
     float lostTimer = 0f;
     float perceptionTimer = 0f;
 
@@ -35,6 +37,7 @@ public class VisionSystem : MonoBehaviour
     #region Getters
     public Transform Target {  get; private set; } //player
     public Vector3 LastKnownPosition { get; private set; } //última posición conocida del player
+    public bool IsPlayerInStopArea { get; private set; } //geter para movement
     public bool CanSeeTarget => canSeeTarget; //informa del si es true or false
     #endregion
 
@@ -71,6 +74,8 @@ public class VisionSystem : MonoBehaviour
         bool obstacle = CheckObstacle(dirToTarget, distToTarget, out rayObstacleDetector);
 
         UpdateVisionState(inCone, obstacle, inPerceptionArea);
+
+        CheckStopArea();
     }
 
     void UpdateVisionState(bool inCone, bool obstacle, bool inPerceptionArea)
@@ -197,6 +202,17 @@ public class VisionSystem : MonoBehaviour
         perceptionTimer = perceptionDelay;
         return false;
     }
+    void CheckStopArea()
+    {
+        if(!visionEnable || Target == null)
+        {
+            IsPlayerInStopArea = false;
+            return;
+        }
+
+        float distance = Vector3.Distance(visionPoint.position, Target.position);
+        IsPlayerInStopArea = distance <= stopAreaRadius;
+    }
     #endregion
 
     #region Utilities
@@ -214,7 +230,7 @@ public class VisionSystem : MonoBehaviour
     {
         if (visionPoint == null) return;
 
-        // ----- COLOR BASE SEGÚN ESTADO -----
+        //COLOR BASE SEGÚN ESTADO
         Color baseColor;
 
         if (!visionEnable)
@@ -247,6 +263,10 @@ public class VisionSystem : MonoBehaviour
             Vector3 rayEnd = rayObstacleDetector.collider != null ? rayObstacleDetector.point : Target.position;
             Gizmos.DrawLine(visionPoint.position, rayEnd);
         }
+
+        // Área de parada
+        Gizmos.color = new Color(1f, 0.3f, 0.3f, visionEnable ? 1f : 0.2f);
+        Gizmos.DrawWireSphere(visionPoint.position, stopAreaRadius);
     }
     #endregion
 }

@@ -1,6 +1,11 @@
 ﻿using System;
 using UnityEngine;
 
+/// <summary>
+/// ListenSystem: Sistema de percepción auditiva del enemigo.
+/// Detecta ruidos (jugador corriendo o disparos) dentro de un radio,
+/// y tambien reacciona a impactos de bala que impactan contra el. 
+/// </summary>
 public class ListenSystem : MonoBehaviour
 {
     #region General Variables
@@ -11,7 +16,7 @@ public class ListenSystem : MonoBehaviour
 
     float lostTimer = 0f;
     bool iListen; //estado de detección actual
-    bool isEnable = true; //Control interno del sistema
+    bool isEnable = true; //control interno del sistema
     #endregion
 
     #region Eventos

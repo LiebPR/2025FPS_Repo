@@ -2,10 +2,18 @@ using System;
 using UnityEngine;
 using UnityEngine.AI;
 
+/// <summary>
+/// EnemyMovement: Gestiona el movimiento del enemigo entre estados (Patrulla, Idle y Presecución)
+/// utilizando un NavMeshAgent y un sistema de detección.
+/// </summary>
 public class EnemyMovement : MonoBehaviour
 {
     #region Variables Generales
     [SerializeField] Enemy enemyData;
+
+    [Header("Movement Speed")]
+    [SerializeField] float patrolSpeed = 2f; //vel. de patrulla
+    [SerializeField] float chaseSpeed = 5f; //vel. de perseguir
 
     [Header("Patroling Stats")]
     [SerializeField] float walkPointRange = 10f; //radio máximo de generación de puntos a perseguir
@@ -14,6 +22,14 @@ public class EnemyMovement : MonoBehaviour
 
     [Header("Idle Stats")]
     [SerializeField] float idleTime = 1f;
+
+    [Header("Stop Behavior")]
+    [SerializeField] float minStopDistance = 1.5f;
+    [SerializeField] float maxStopDistance = 3.5f;
+    [SerializeField] float stopTransitionTime = 0.5f;
+    bool isStopping;
+    float currentStopDistance;
+    float stopTimer;
 
     [Header("Stuck Detection")]
     [SerializeField] float stuckCheckTime = 2f; //tiempo que el agente espera para comprobar si está stuck
@@ -65,8 +81,11 @@ public class EnemyMovement : MonoBehaviour
         CheckIfStuck();
     }
     #region Patroling
+    //Estado patrulla: Busca puntos aleatorios de patrulla en el terreno y se mueve entre ellos lentamente 
     void HandlePatrol()
     {
+        agent.speed = patrolSpeed;
+
         // Generar un punto si no hay walkPoint
         if (!walkPointSet)
         {
@@ -77,7 +96,11 @@ public class EnemyMovement : MonoBehaviour
         if (walkPointSet)
         {
             if (agent.destination != walkPoint)
+            {
+                agent.speed = Mathf.Lerp(agent.speed, chaseSpeed, Time.deltaTime * 3f);
                 agent.SetDestination(walkPoint);
+            }
+                
 
             // Llego al punto, pasa a idle
             if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
@@ -106,6 +129,8 @@ public class EnemyMovement : MonoBehaviour
                 {
                     walkPoint = hit.position;
                     walkPointSet = true;
+
+                    agent.speed = Mathf.Lerp(agent.speed, chaseSpeed, Time.deltaTime * 3f);
                     agent.SetDestination(walkPoint);
                 }
             }
@@ -117,9 +142,11 @@ public class EnemyMovement : MonoBehaviour
     void HandleIdle()
     {
         idleTimer -= Time.deltaTime;
-        agent.ResetPath(); //Detener movimiento mientras está idle
+        
+        agent.speed = Mathf.Lerp(agent.speed, 0f, Time.deltaTime * 2f);
+        agent.SetDestination(transform.position); //Detener movimiento mientras está idle
 
-        if(idleTimer <= 0)
+        if (idleTimer <= 0)
         {
             OnIdleExit?.Invoke();
         }
@@ -130,6 +157,53 @@ public class EnemyMovement : MonoBehaviour
     void HandleChase()
     {
         if (vision.Target == null) return;
+
+        float distance = Vector3.Distance(transform.position, vision.Target.position);
+
+        agent.speed = chaseSpeed;
+
+        // Si el player entra en el área de parada
+        if (vision.IsPlayerInStopArea)
+        {
+            if (!isStopping)
+            {
+                // Genera una distancia aleatoria y marca que se está deteniendo
+                currentStopDistance = UnityEngine.Random.Range(minStopDistance, maxStopDistance);
+                isStopping = true;
+                stopTimer = 0f; //reinicia temporizador de frenado
+            }
+
+            if(distance < currentStopDistance)
+            {
+                stopTimer += Time.deltaTime;
+
+                //Calcular el factor de interpolación
+                float t = Mathf.Clamp01(stopTimer / stopTransitionTime);
+
+                //Lerp de velocidad: de chaseSpeed a 0
+                agent.speed = Mathf.Lerp(chaseSpeed, 0f, t);
+
+                //Mantiene al agente activo para conservar rotación automática
+                agent.SetDestination(transform.position);
+
+                //Rotación suave hacia el jugador
+                Vector3 dir = vision.Target.position - transform.position;
+                dir.y = 0;
+                if(dir.sqrMagnitude > 0.01f)
+                {
+                    Quaternion look = Quaternion.LookRotation(dir);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, look, 5f * Time.deltaTime);
+                }
+                return;
+            }
+        }
+        else
+        {
+            isStopping = false;
+            stopTimer = 0f;
+        }
+        //Si esta afuera del rango de parada, retoma persecución
+        agent.speed = Mathf.Lerp(agent.speed, chaseSpeed, Time.deltaTime * 3f);
         agent.SetDestination(vision.Target.position);
     }
     #endregion
@@ -149,7 +223,7 @@ public class EnemyMovement : MonoBehaviour
             if(stuckTimer >= maxStuckDuration)
             {
                 walkPointSet = false;
-                agent.ResetPath();
+                agent.SetDestination(transform.position);
                 stuckTimer = 0f;
             }
 

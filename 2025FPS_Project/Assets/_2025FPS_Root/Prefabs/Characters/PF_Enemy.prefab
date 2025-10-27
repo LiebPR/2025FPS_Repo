@@ -224,6 +224,7 @@ GameObject:
   - component: {fileID: 9139925999018009440}
   - component: {fileID: 7664072414725618463}
   - component: {fileID: 1218179204903183289}
+  - component: {fileID: 7396709396287491517}
   m_Layer: 6
   m_Name: PF_Enemy
   m_TagString: Enemy
@@ -365,8 +366,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enemyData: {fileID: 11400000, guid: c2eb823233453c0459dd72b4a1ea3a48, type: 2}
   perceptionDelay: 0.5
-  lostDelay: 0.5
+  lostDelay: 1
   visionPoint: {fileID: 1407380646861190733}
+  stopAreaRadius: 5
+  stopDistanceRange: {x: 5, y: 4}
 --- !u!114 &1679341798918562745
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -397,8 +400,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyData: {fileID: 11400000, guid: c2eb823233453c0459dd72b4a1ea3a48, type: 2}
+  patrolSpeed: 2
+  chaseSpeed: 5
   walkPointRange: 10
   idleTime: 1
+  minStopDistance: 4
+  maxStopDistance: 5
   stuckCheckTime: 2
   stuckThreshold: 0.1
   maxStuckDuration: 3
@@ -476,3 +483,24 @@ MonoBehaviour:
   maxHealth: 100
   health: 0
   damagedMat: {fileID: 2100000, guid: 25e1f4d730f3b7a45892a0bc42adaa41, type: 2}
+  healthBar: {fileID: 0}
+--- !u!114 &7396709396287491517
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7642557723264205144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76e01c1a06d9507449e9a18c9318ecc8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  shootPoint: {fileID: 5301221107631865196}
+  impactLayer:
+    serializedVersion: 2
+    m_Bits: 392
+  damage: 10
+  range: 6
+  shootingCooldown: 1
+  attackRange: 9

@@ -11,7 +11,7 @@ public class EnemySpawner : MonoBehaviour
     #region General Variables
     [Header("PoolManager")]
     [SerializeField] PoolManager poolManager;
-    [SerializeField] string poolName = "Enemy"; //Nombre de la pool a spawnear
+    [SerializeField] string poolName = "Enemy"; //nombre de la pool a spawnear
 
     [Header("Spawner Settings")]
     [SerializeField] int maxEnemies = 10; //número máximo de enemigos
@@ -21,7 +21,7 @@ public class EnemySpawner : MonoBehaviour
     [Header("Spawn Zones")]
     [SerializeField] Collider[] spawnZones; //colliders que definen las áreas de spawn
 
-    List<GameObject> activeEnemies = new List<GameObject>();
+    List<GameObject> activeEnemies = new List<GameObject>(); //lista de enemigos activos en escena
     #endregion
 
     private void Start()
@@ -54,22 +54,26 @@ public class EnemySpawner : MonoBehaviour
     {
         if (spawnZones.Length == 0) return;
 
+        //Seleccionar una zona aleatoria
         Collider zone = spawnZones[Random.Range(0, spawnZones.Length)];
 
-        //Obtener posición aleatoria dentro de los bounds del collider
+        //Obtener una posición aleatoria dentro de los bounds
         Vector3 spawnPos = GetRandomPointInsideCollider(zone);
 
+        //Solicitar un enemigo de la pool
         GameObject enemy = poolManager.Spawn(poolName, spawnPos, Quaternion.identity);
 
         if(enemy != null)
         {
             activeEnemies.Add(enemy);
 
-            //Registrar callback de muerte (ejemplo, puedes reemplazar con tu sistema de salud
+            //Suscrbirse al evento OnDeath de su componente Health
             Health enemyHealth = enemy.GetComponent<Health>();
             if(enemyHealth != null)
             {
-                enemyHealth.OnDeath += () => StartCoroutine(RespawnEnemy(enemy));
+                //Evitar duplicación de suscripciones
+                enemyHealth.OnDeath -= () => OnEnemyDeath(enemy);
+                enemyHealth.OnDeath += () => OnEnemyDeath(enemy);
             }
         }
     }
@@ -77,31 +81,29 @@ public class EnemySpawner : MonoBehaviour
     //Devuelve una posición aleatoria dentro de un collider
     Vector3 GetRandomPointInsideCollider(Collider col)
     {
-        Vector3 point = new Vector3(Random.Range(col.bounds.min.x, col.bounds.max.x), Random.Range(col.bounds.min.y, col.bounds.max.y), Random.Range(col.bounds.min.z, col.bounds.max.z));
-        return point;
+        return new Vector3(Random.Range(col.bounds.min.x, col.bounds.max.x), Random.Range(col.bounds.min.y, col.bounds.max.y), Random.Range(col.bounds.min.z, col.bounds.max.z));
     }
     #endregion
 
     #region Respawn Enemigos
-    //Respawnea un enemigo tras morir con un delay configurable
-    IEnumerator RespawnEnemy(GameObject enemy)
+    //Llamado cuando un enemigo se desactiva en la PoolManager.
+    //Espera un tiempo y respawnea otro enemigo si hay huecos en la pool
+    void OnEnemyDeath(GameObject enemy)
     {
-        //Quitar de la lista de activos
         activeEnemies.Remove(enemy);
+        StartCoroutine(RespawnAfterDelay());
+    }
 
-        //Devolver a la pool
-        poolManager.Despawn(poolName, enemy);
-
-        //Esperar el delay antes de reespawnear
+    //Esperar el delay antes de intentar reactivar un enemigo desactivado de al pool
+    IEnumerator RespawnAfterDelay()
+    {
         yield return new WaitForSeconds(spawnDelayRespawn);
 
-        //Mantener siempre maxEnemies activos
+        //Solo respawneamos si hay menos enemigos activos que el máximo
         if(activeEnemies.Count < maxEnemies)
         {
             SpawnEnemyAtRandomPosition();
         }
-
-
     }
     #endregion
 }

@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// EnemyHealth: Sistema de salud de enemigo. Gestiona daño, feedback visual y evento de muerte.
@@ -18,12 +19,19 @@ public class Health : MonoBehaviour
     [SerializeField] Material damagedMat; //Material feedback de daño
     Material baseMat; //Material base del enemigo
     MeshRenderer enemyRend; //Referencia al MeshRenderer propio
+
+    [Header("Player UI")]
+    [SerializeField] Image healthBar;
     #endregion
 
     #region Events
     public event Action OnDeath; //informa de la muerte del enemigo
+    public event Action<Vector3> OnHit; //informa de que le han impactado
     #endregion
 
+    #region Referencias
+    EnemyStateMachine fsm;
+    #endregion
 
     private void Awake()
     {
@@ -32,6 +40,13 @@ public class Health : MonoBehaviour
         if (!isPlayer)
         {
             baseMat = enemyRend.material;
+            fsm = GetComponent<EnemyStateMachine>();
+        }
+        else
+        {
+            //Inicializar barra de vida del jugador
+            if (healthBar != null)
+                healthBar.fillAmount = 1f;
         }
     }
 
@@ -49,8 +64,22 @@ public class Health : MonoBehaviour
     public void TakeDamage(int damage)
     {
         currentHealth -= damage;
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+
+        if(isPlayer && healthBar != null)
+        {
+            //Actualizar barra de vida
+            healthBar.fillAmount = (float) currentHealth / maxHealth;
+        }
+
         if (!isPlayer)
         {
+            //Solo lanza el evento OnHit si NO esta en Chase ni Alert
+            if(fsm != null && fsm.currentState != EnemyState.Chase && fsm.currentState != EnemyState.Alert)
+            {
+                OnHit?.Invoke(transform.position);
+            }
+            
             enemyRend.material = damagedMat; //feedback visual de impacto
             Invoke(nameof(ResetDamageMat), 0.1f);
         }

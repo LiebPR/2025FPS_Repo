@@ -135,7 +135,6 @@ public class GunSystem : MonoBehaviour
         if (Physics.Raycast(fpsCam.transform.position, spreadDirection, out hit, range, impactLayer))
         {
             //AQUI PUEDO CODEAR TODOS LOS EFECTOS QUE QUIERO PARA MI INTERACCIÓN
-            Debug.Log("Disparo hacia: " + hit.point + " | Colision con: " + hit.collider.name);
 
             if (hit.collider.TryGetComponent(out Health health))
             {

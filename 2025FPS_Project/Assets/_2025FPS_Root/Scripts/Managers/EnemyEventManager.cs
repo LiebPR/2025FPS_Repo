@@ -7,6 +7,7 @@ public class EnemyEventManager : MonoBehaviour
     VisionSystem visionSystem;
     ListenSystem listenSystem;
     EnemyMovement movement;
+    Health health;
     #endregion
 
     private void Awake()
@@ -15,6 +16,7 @@ public class EnemyEventManager : MonoBehaviour
         visionSystem = GetComponent<VisionSystem>();
         listenSystem = GetComponent<ListenSystem>();
         movement = GetComponent<EnemyMovement>();
+        health = GetComponent<Health>();
     }
 
     private void OnEnable()
@@ -26,11 +28,13 @@ public class EnemyEventManager : MonoBehaviour
         //Listen System
         listenSystem.OnListenPlayer += HandleListen;
         listenSystem.OnDontListenAnything += HandleDontListen;
-        //listenSystem.OnBulletImpact += HandleBulletImpact;
 
         //Movement
         movement.OnIdleEnter += HandleIdleEnter;
         movement.OnIdleExit += HandleIdleExit;
+
+        //Health
+        health.OnHit += HandleHit;
     }
 
     private void OnDisable()
@@ -42,11 +46,13 @@ public class EnemyEventManager : MonoBehaviour
         //Listen System
         listenSystem.OnListenPlayer -= HandleListen;
         listenSystem.OnDontListenAnything -= HandleDontListen;
-        //listenSystem.OnBulletImpact -= HandleBulletImpact;
 
         //Movement
         movement.OnIdleEnter -= HandleIdleEnter;
         movement.OnIdleExit -= HandleIdleExit;
+
+        //Health
+        health.OnHit -= HandleHit;
     }
 
     #region Vision Hanlders
@@ -63,15 +69,18 @@ public class EnemyEventManager : MonoBehaviour
     {
         fsm.OnPatrol();
     }
-    void HandleBulletImpact(Vector3 position)
-    {
-        fsm.OnPatrol();
-    }
     #endregion
 
     #region Movement Handlers
     //Idle: 
     void HandleIdleEnter() => fsm.OnIdle();
     void HandleIdleExit() => fsm.OnPatrol();
+    #endregion
+
+    #region Health Handlers
+    void HandleHit(Vector3 hit)
+    {
+        fsm.OnChase();
+    }
     #endregion
 }

@@ -23,7 +23,4 @@ public class Enemy : ScriptableObject
     [Header("Attack Settings")]
     public float damage = 10f;
     public float attackRangeRadius = 5f;
-
-    [Header("Health System")]
-    public float vida = 10f;
 }
