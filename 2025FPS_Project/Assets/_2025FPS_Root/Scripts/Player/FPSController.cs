@@ -13,6 +13,8 @@ public class FPSController : MonoBehaviour
     [SerializeField] float crouchSpeed = 3f;
     [SerializeField] float maxForce = 1f; //Fuerza máxima de aceleración
     [SerializeField] float sensitivity = 0.1f;
+    bool isSprinting;
+    bool isCrouching;
 
     [Header("Jumping")]
     [SerializeField] float jumpForce = 5f;
@@ -21,15 +23,21 @@ public class FPSController : MonoBehaviour
     [SerializeField] LayerMask groundLayer;
     bool isGrounded;
 
-    [Header("Player State Bools")]
-    [SerializeField] bool isSprinting;
-    [SerializeField] bool isCrouching;
-
     [Header("FOV Settings")]
     [SerializeField] Camera playerCamera;
     [SerializeField] float normalFOV = 60f;
     [SerializeField] float sprintFOV = 75f;
     [SerializeField] float fovChangeSpeed = 8f;
+
+    [Header("Head Bob Settings")]
+    [SerializeField] float walkBobSpeed = 10f;
+    [SerializeField] float walkBobAmount = 0.05f;
+    [SerializeField] float sprintBobSpeed = 14f;
+    [SerializeField] float sprinBobAmount = 0.1f;
+    [SerializeField] float crouchBobSpeed = 6f;
+    [SerializeField] float crouchBobAmount = 0.025f;
+    Vector3 camOriginalPos;
+    float bobTimer = 0f;
 
     //Input Variables
     Vector2 moveInput;
@@ -78,6 +86,9 @@ public class FPSController : MonoBehaviour
         //Lock cursor
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        //Head bob: 
+        camOriginalPos = camHolder.transform.localPosition;
     }
 
     
@@ -90,6 +101,10 @@ public class FPSController : MonoBehaviour
 
         UpdateFOV();
 
+        //Actualizar sprint dinamicamente
+        if (isSprinting && !HasMovementInput())
+            isSprinting = false;
+
     }
 
     private void FixedUpdate()
@@ -99,6 +114,7 @@ public class FPSController : MonoBehaviour
 
     private void LateUpdate()
     {
+        HandleHeadBob();
         CameraLook();
     }
 
@@ -143,6 +159,30 @@ public class FPSController : MonoBehaviour
         float targetFOV = isSprinting ? sprintFOV : normalFOV;
         playerCamera.fieldOfView = Mathf.Lerp(playerCamera.fieldOfView, targetFOV, Time.deltaTime * fovChangeSpeed);
     }
+
+    void HandleHeadBob()
+    {
+        if(!HasMovementInput() || !isGrounded)
+        {
+            //Volver suavemente a la posición original si no hay movimiento
+            camHolder.transform.localPosition = Vector3.Lerp(camHolder.transform.localPosition, camOriginalPos, Time.deltaTime * 5f);
+
+            //Reiniciar temporizador para evitar que siga la animación
+            bobTimer = 0f;
+            return;
+        }
+
+        float speed = isCrouching ? crouchBobSpeed : (isSprinting ? sprintBobSpeed : walkBobSpeed);
+        float amount = isCrouching ? crouchBobAmount : (isSprinting ? sprinBobAmount : walkBobAmount);
+
+        bobTimer += Time.deltaTime * speed;
+
+        //Movimiento sinusoidal
+        float xBob = Mathf.Sin(bobTimer) * amount;
+        float yBob = Mathf.Cos(bobTimer * 2f) * amount;
+
+        camHolder.transform.localPosition = camOriginalPos + new Vector3(xBob, yBob, 0);
+    }
     #endregion
 
     #region Auxiliar
@@ -176,8 +216,11 @@ public class FPSController : MonoBehaviour
 
     public void HandleSprint(bool isPressed)
     {
-        if (isCrouching && isPressed) return;
-        isSprinting = isPressed;
+        // Sprint solo si el botón está presionado y hay movimiento
+        isSprinting = isPressed && HasMovementInput();
+
+        // Evitar sprint si estás agachado
+        if (isCrouching) isSprinting = false;
     }
     #endregion
 }

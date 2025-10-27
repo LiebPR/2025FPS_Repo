@@ -2077,6 +2077,30 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8005873583484721293, guid: d9f39bc75809cfe4796ee2631fa5b7bc, type: 3}
+      propertyPath: walkBobSpeed
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8005873583484721293, guid: d9f39bc75809cfe4796ee2631fa5b7bc, type: 3}
+      propertyPath: walkBobAmount
+      value: 0.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 8005873583484721293, guid: d9f39bc75809cfe4796ee2631fa5b7bc, type: 3}
+      propertyPath: crouchBobSpeed
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8005873583484721293, guid: d9f39bc75809cfe4796ee2631fa5b7bc, type: 3}
+      propertyPath: sprinBobAmount
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8005873583484721293, guid: d9f39bc75809cfe4796ee2631fa5b7bc, type: 3}
+      propertyPath: sprintBobSpeed
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 8005873583484721293, guid: d9f39bc75809cfe4796ee2631fa5b7bc, type: 3}
+      propertyPath: crouchBobAmount
+      value: 0.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 8005873583484721293, guid: d9f39bc75809cfe4796ee2631fa5b7bc, type: 3}
       propertyPath: groundLayer.m_Bits
       value: 256
       objectReference: {fileID: 0}

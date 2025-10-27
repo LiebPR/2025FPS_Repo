@@ -200,9 +200,9 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.27679157
-  m_Height: 1.9812983
+  m_Height: 1.5200807
   m_Direction: 1
-  m_Center: {x: 0, y: 0.49064916, z: 0.067816146}
+  m_Center: {x: 0, y: 0.721258, z: 0.06781614}
 --- !u!1 &7642557723264205144
 GameObject:
   m_ObjectHideFlags: 0
@@ -369,7 +369,6 @@ MonoBehaviour:
   lostDelay: 1
   visionPoint: {fileID: 1407380646861190733}
   stopAreaRadius: 5
-  stopDistanceRange: {x: 5, y: 4}
 --- !u!114 &1679341798918562745
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -406,6 +405,7 @@ MonoBehaviour:
   idleTime: 1
   minStopDistance: 4
   maxStopDistance: 5
+  stopTransitionTime: 0.5
   stuckCheckTime: 2
   stuckThreshold: 0.1
   maxStuckDuration: 3
