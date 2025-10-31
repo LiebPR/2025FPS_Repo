@@ -1,4 +1,5 @@
 using NUnit.Framework.Internal.Commands;
+using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -17,7 +18,6 @@ public class FPSController : MonoBehaviour
     bool isCrouching;
 
     [Header("Jumping")]
-    [SerializeField] float jumpForce = 5f;
     [SerializeField] GameObject groundCheck;
     [SerializeField] float groundCheckRadius = 0.3f;
     [SerializeField] LayerMask groundLayer;
@@ -38,6 +38,13 @@ public class FPSController : MonoBehaviour
     [SerializeField] float crouchBobAmount = 0.025f;
     Vector3 camOriginalPos;
     float bobTimer = 0f;
+
+    [Header("Slide Settings")]
+    [SerializeField] float slideForce = 10f;
+    [SerializeField] float slideDuration = 1f;
+    [SerializeField] float slideFriction = 5f;
+    bool isSliding;
+    Coroutine slideCoroutine;
 
     //Input Variables
     Vector2 moveInput;
@@ -67,7 +74,6 @@ public class FPSController : MonoBehaviour
     {
         InputManager.OnMoveEvent += HandleMove;
         InputManager.OnLookEvent += HandleLook;
-        InputManager.OnJumpEvent += HandleJump;
         InputManager.OnCrouchEvent += HandleCrouch;
         InputManager.OnSprintEvent += HandleSprint;
     }
@@ -75,7 +81,6 @@ public class FPSController : MonoBehaviour
     {
         InputManager.OnMoveEvent -= HandleMove;
         InputManager.OnLookEvent -= HandleLook;
-        InputManager.OnJumpEvent -= HandleJump;
         InputManager.OnCrouchEvent -= HandleCrouch;
         InputManager.OnSprintEvent -= HandleSprint;
     }
@@ -109,6 +114,7 @@ public class FPSController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if(isSliding) return; //bloquear movimiento normal durante el slide
         Movement();
     }
 
@@ -134,11 +140,6 @@ public class FPSController : MonoBehaviour
 
         //Aplicar la fuerza de movimiento
         playerRb.AddForce(velocityChange, ForceMode.VelocityChange);
-    }
-
-    void Jump()
-    {
-        if (isGrounded) playerRb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
     }
 
     #region Camera
@@ -185,6 +186,41 @@ public class FPSController : MonoBehaviour
     }
     #endregion
 
+    #region Slide System
+    void StartSlide()
+    {
+        if(slideCoroutine != null)
+        {
+            StopCoroutine(slideCoroutine);
+        }
+        slideCoroutine = StartCoroutine(SlideRoutine());
+    }
+
+    IEnumerator SlideRoutine()
+    {
+        isSliding = true;
+
+        Vector3 slideDir = new Vector3(moveInput.x, 0, moveInput.y).normalized;
+        if (slideDir.magnitude < 0.1f)
+            slideDir = transform.forward; //fallback a la dirección de la cámara
+
+        slideDir = transform.TransformDirection(slideDir);
+
+        float currentForce = slideForce;
+        float startTime = Time.time;
+
+        while(Time.time < startTime + slideDuration)
+        {
+            if(!isGrounded) break;
+            playerRb.AddForce(slideDir * currentForce, ForceMode.Acceleration);
+            currentForce = Mathf.Lerp(currentForce, 0, Time.deltaTime * slideFriction);
+            yield return null;
+        }
+
+        isSliding = false;
+    }
+    #endregion
+
     #region Auxiliar
     public bool HasMovementInput()
     {
@@ -203,15 +239,16 @@ public class FPSController : MonoBehaviour
         lookInput = input;
     }
 
-    public void HandleJump()
+    public void HandleCrouch(bool isPressed)
     {
-        Jump();
-    }
-
-    public void HandleCrouch()
-    {
-        isCrouching = !isCrouching;
+        isCrouching = isPressed;
         anim.SetBool("isCrouching", isCrouching);
+
+        //Si el jugador está sprintando, en el suelo y presiona crouch desliza.
+        if(isPressed && isSprinting && isGrounded && !isSliding)
+        {
+            StartSlide();
+        }
     }
 
     public void HandleSprint(bool isPressed)

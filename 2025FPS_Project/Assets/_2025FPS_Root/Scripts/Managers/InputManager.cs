@@ -13,7 +13,7 @@ public class InputManager : MonoBehaviour
     public static event Action<Vector2> OnMoveEvent;
     public static event Action<Vector2> OnLookEvent;
     public static event Action OnJumpEvent;
-    public static event Action OnCrouchEvent;
+    public static event Action<bool> OnCrouchEvent;
     public static event Action<bool> OnSprintEvent;
 
     //Para GunSystem
@@ -42,7 +42,8 @@ public class InputManager : MonoBehaviour
         inputActions.Gameplay.Jump.performed += ctx => OnJumpEvent?.Invoke();
 
         //Agacharse
-        inputActions.Gameplay.Crouch.performed += ctx => OnCrouchEvent?.Invoke();
+        inputActions.Gameplay.Crouch.performed += ctx => OnCrouchEvent?.Invoke(true);
+        inputActions.Gameplay.Crouch.canceled += ctx => OnCrouchEvent?.Invoke(false);
 
         //Correr
         inputActions.Gameplay.Sprint.performed += ctx => OnSprintEvent?.Invoke(true);
@@ -79,7 +80,8 @@ public class InputManager : MonoBehaviour
         inputActions.Gameplay.Jump.performed -= ctx => OnJumpEvent?.Invoke();
 
         //Agacharse
-        inputActions.Gameplay.Crouch.performed -= ctx => OnCrouchEvent?.Invoke();
+        inputActions.Gameplay.Crouch.performed -= ctx => OnCrouchEvent?.Invoke(true);
+        inputActions.Gameplay.Crouch.canceled -= ctx => OnCrouchEvent?.Invoke(false);
 
         //Correr
         inputActions.Gameplay.Sprint.performed -= ctx => OnSprintEvent?.Invoke(true);

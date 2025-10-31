@@ -279,18 +279,24 @@ MonoBehaviour:
   crouchSpeed: 3
   maxForce: 1
   sensitivity: 0.1
-  jumpForce: 6
   groundCheck: {fileID: 7044904031915176628}
   groundCheckRadius: 0.3
   groundLayer:
     serializedVersion: 2
     m_Bits: 256
-  isSprinting: 0
-  isCrouching: 0
   playerCamera: {fileID: 6638849855594031741}
   normalFOV: 60
   sprintFOV: 75
   fovChangeSpeed: 8
+  walkBobSpeed: 10
+  walkBobAmount: 0.05
+  sprintBobSpeed: 14
+  sprinBobAmount: 0.1
+  crouchBobSpeed: 6
+  crouchBobAmount: 0.025
+  slideForce: 10
+  slideDuration: 1
+  slideFriction: 5
 --- !u!114 &4159445354567149422
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -307,21 +313,24 @@ MonoBehaviour:
   shootPoint: {fileID: 0}
   impactLayer:
     serializedVersion: 2
-    m_Bits: 72
+    m_Bits: 584
   damage: 30
   range: 100
   baseSpreadAngle: 0.5
   moveSpreadMultiplier: 2
   sprintSpreadMultiplier: 2.5
   jumpSpreadMultiplier: 4
-  shootingCooldown: 1
+  shootingCooldown: 0.6
   reloadTime: 0.1
   allowButtonHold: 0
-  recoilAmount: 5
-  recoilSpeed: 9
-  recoilRecovery: 10
+  recoilAmount: 8
+  recoilSpeed: 5
+  recoilRecovery: 5
   ammoSize: 30
   bulletsPerTap: 1
+  weaponMesh: {fileID: 2678244781434658598}
+  weaponRecoilBack: 0.05
+  weaponRecoilSpeed: 5
 --- !u!114 &4789075039261063539
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -338,6 +347,7 @@ MonoBehaviour:
   maxHealth: 100
   health: 0
   damagedMat: {fileID: 0}
+  healthBar: {fileID: 0}
 --- !u!95 &8061097929383227906
 Animator:
   serializedVersion: 7
@@ -555,31 +565,31 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: ef93da575927bf040bc40e669eb415a4, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.383
+      value: 0.358
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ef93da575927bf040bc40e669eb415a4, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.081
+      value: -0.195
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ef93da575927bf040bc40e669eb415a4, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.582
+      value: 0.627
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ef93da575927bf040bc40e669eb415a4, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.09584071
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ef93da575927bf040bc40e669eb415a4, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ef93da575927bf040bc40e669eb415a4, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.9953967
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ef93da575927bf040bc40e669eb415a4, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ef93da575927bf040bc40e669eb415a4, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -587,7 +597,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ef93da575927bf040bc40e669eb415a4, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 169.001
+      value: 180
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: ef93da575927bf040bc40e669eb415a4, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z

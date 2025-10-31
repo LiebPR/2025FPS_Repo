@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fa4d744e076e4f64b9f50f7d9fc7c837, type: 3}
-  m_Name: PoolData 1
+  m_Name: SO_PoolData 1
   m_EditorClassIdentifier: 
   pools:
   - poolName: Enemy
     prefab: {fileID: 7642557723264205144, guid: 5ed4239ec4509634f938e2f5e681e01f, type: 3}
-    initialSize: 10
+    initialSize: 5
     canExpand: 1

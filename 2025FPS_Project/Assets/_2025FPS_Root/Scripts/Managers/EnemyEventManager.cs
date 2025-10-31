@@ -27,7 +27,7 @@ public class EnemyEventManager : MonoBehaviour
 
         //Listen System
         listenSystem.OnListenPlayer += HandleListen;
-        listenSystem.OnDontListenAnything += HandleDontListen;
+        listenSystem.OnStopListen += HandleDontListen;
 
         //Movement
         movement.OnIdleEnter += HandleIdleEnter;
@@ -45,7 +45,7 @@ public class EnemyEventManager : MonoBehaviour
 
         //Listen System
         listenSystem.OnListenPlayer -= HandleListen;
-        listenSystem.OnDontListenAnything -= HandleDontListen;
+        listenSystem.OnStopListen -= HandleDontListen;
 
         //Movement
         movement.OnIdleEnter -= HandleIdleEnter;
@@ -61,11 +61,11 @@ public class EnemyEventManager : MonoBehaviour
     #endregion
 
     #region Listen Handlers
-    void HandleListen(Vector3 position)
+    void HandleListen(Transform playerTransform)
     {
         fsm.OnChase();
     }
-    void HandleDontListen()
+    void HandleDontListen(Transform playerTransform)
     {
         fsm.OnPatrol();
     }

@@ -9,122 +9,153 @@ using UnityEngine;
 public class ListenSystem : MonoBehaviour
 {
     #region General Variables
-    [Header("Listen Settings")]
-    [SerializeField] float listenRadius = 10f; //radio de escucha
-    [SerializeField] float lostDelay = 1f; //tiempo de perdida
-    [SerializeField] LayerMask targetLayer; 
+    [Header("Hearing Ranges")]
+    [SerializeField] float closeRange = 25f; //escucha cualquier ruido
+    [SerializeField] float mediumRange = 60f; //escucha alguno ruidos
+    [SerializeField] float longRange = 100f; //ecucha los disparos
 
+    [Header("Audio Lost Settings")]
+    [SerializeField] float lostDelay = 1.5f; //tiempo de perder la escucha
+
+    [Header("Activate logs")]
+    [SerializeField] bool debugLogs = false;
+
+    bool iListen; //flag que controla si se está escuchando o no
+    bool hasListenedOnce; //previene llamadas multiples de eventos inecesarias
+    bool listenEnabled = true; //flag para permitir escuchar
+    float distanceToPlayer; //distancia real al jugador
     float lostTimer = 0f;
-    bool iListen; //estado de detección actual
-    bool isEnable = true; //control interno del sistema
     #endregion
 
-    #region Eventos
-    public event Action<Vector3> OnListenPlayer; //cuando se escucha al jugador
-    //public event Action<Vector3> OnBulletImpact; //cuando detecta un jugador
-    public event Action OnDontListenAnything; //no escucha nada
+    #region Referencias
+    VisionSystem vision;
+    FPSController fpsController;
+    GunSystem gunSystem;
     #endregion
+
+    #region Events
+    public event Action<Transform> OnListenPlayer; //cuando el enemigo escucha al jugador
+    public event Action<Transform> OnStopListen; //cuando deja de escucharlo
+    #endregion
+
+    private void Awake()
+    {
+        vision = GetComponent<VisionSystem>();
+        fpsController =FindFirstObjectByType<FPSController>();
+        gunSystem = FindFirstObjectByType<GunSystem>();
+    }
 
     private void Update()
     {
-        if (!isEnable) return; //Ignoramos toda la lógica si está desactivado
+        if(vision == null || fpsController == null) return;
 
-        Collider[] hits = DetectionAudio(); //detecta jugadores y arma en el radio
-        bool detectedThisFrame = ProcessDetection(hits); //procesa detecciones y dispara eventos
-        HandleLostDetection(detectedThisFrame); //gestiona pérdida de detección
+        EvaluateHearing();
     }
 
+    #region Core Logic
+    void EvaluateHearing()
+    {
+        if (!listenEnabled)
+        {
+            iListen = false;
+            hasListenedOnce = false;
+            lostTimer = 0f;
+            return;
+        }
+
+        //Distancia obtenida desde la última posición conocida del VisionSystem
+        distanceToPlayer = Vector3.Distance(transform.position, vision.LastKnownPosition);
+
+        bool previousListen = iListen;
+        iListen = false;
+
+        //Condiciones de escuchar por rango
+        if(gunSystem.IsShooting && distanceToPlayer <= longRange)
+        {
+            iListen = true;
+        }
+        else if(distanceToPlayer <= mediumRange && fpsController.IsSprinting)
+        {
+            iListen = true;
+        }
+        else if (distanceToPlayer <= closeRange && fpsController.HasMovementInput() && !fpsController.IsCrouching)
+        {
+            iListen = true;
+        }
+
+        // Manejo de temporizador de pérdida
+        if (iListen)
+        {
+        lostTimer = lostDelay; // resetea temporizador si todavía escucha
+        }
+        else
+        {
+            if (listenEnabled) // solo decrementa si la escucha está habilitada
+            {
+                lostTimer -= Time.deltaTime;
+                if (lostTimer > 0f)
+                {
+                    iListen = true; // sigue escuchando mientras el timer no expire
+                }
+            }
+        }
+        
+
+        //Control de eventos
+        if (iListen && !previousListen)
+        {
+            if (!hasListenedOnce)
+            {
+                hasListenedOnce = true;
+                OnListenPlayer?.Invoke(fpsController.transform);
+                if (debugLogs) Debug.Log($"[ListenSystem] Escuchando al jugador a {distanceToPlayer:F1}m.");
+            }
+        }
+        else if (!iListen && previousListen)
+        {
+            hasListenedOnce = false;
+            OnStopListen?.Invoke(fpsController.transform);
+            if (debugLogs) Debug.Log("[ListenSystem] Se dejó de escuchar al jugador");
+        }
+    }
+    #endregion
+
     #region Public Controls
-    //Activa o desactiva la percepción auditiva.
     public void SetListenActive(bool active)
     {
-        isEnable = active;
+        listenEnabled = active;
+
         if (!active)
         {
-            //reiniciamos variables al apagar
             iListen = false;
+            hasListenedOnce = false;
             lostTimer = 0f;
         }
     }
     #endregion
 
-    #region Detección
-    Collider[] DetectionAudio()
-    {
-        return Physics.OverlapSphere(transform.position, listenRadius, targetLayer);
-    }
-
-    bool ProcessDetection(Collider[] hits)
-    {
-        bool detected = false;
-
-        foreach (var hit in hits)
-        {
-            FPSController player = hit.GetComponent<FPSController>();
-            GunSystem gun = hit.GetComponent<GunSystem>();
-
-            if(player != null)
-            {
-                if(player.IsSprinting || (gun != null && gun.IsShooting))
-                {
-                    detected = true;
-                    if (!iListen)
-                    {
-                        OnListenPlayer?.Invoke(player.transform.position);
-                        iListen = true;
-                    }
-                }
-                if(gun != null && gun.IsShooting)
-                {
-                    Vector3 impactPoint = gun.LastHitPoint;
-                    OnListenPlayer?.Invoke(impactPoint);
-                    detected = true;
-                }
-            }
-        }
-        return detected;
-    }
-
-    void HandleLostDetection(bool detectedThisFrame)
-    {
-        if (detectedThisFrame)
-        {
-            lostTimer = lostDelay;
-        }
-        else
-        {
-            lostTimer -= Time.deltaTime;
-            if(iListen && lostTimer <= 0f)
-            {
-                iListen = false;
-                lostTimer = 0f;
-                OnDontListenAnything?.Invoke();
-            }
-        }
-    }
-    #endregion
-
-
     #region Gizmos
     private void OnDrawGizmosSelected()
     {
-        if (!isEnable)
+        // Si no está activo, dibujar todo en gris
+        if (!listenEnabled)
         {
-            // Desactivado → color gris-azulado transparente
-            Gizmos.color = new Color(0, 0, 1, 0.15f);
-        }
-        else if (iListen)
-        {
-            // Escuchando activamente → rojo
-            Gizmos.color = Color.red;
-        }
-        else
-        {
-            // Activo pero sin escuchar → azul
-            Gizmos.color = Color.blue;
+            Gizmos.color = Color.gray;
+            Gizmos.DrawWireSphere(transform.position, closeRange);
+            Gizmos.DrawWireSphere(transform.position, mediumRange);
+            Gizmos.DrawWireSphere(transform.position, longRange);
+            return;
         }
 
-        Gizmos.DrawWireSphere(transform.position, listenRadius);
+        // Escucha activa: dibujar colores normales
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, closeRange);
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, mediumRange);
+
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(transform.position, longRange);
     }
     #endregion
 }
