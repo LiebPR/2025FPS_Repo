@@ -8,41 +8,28 @@ using UnityEngine.AI;
 /// </summary>
 public class EnemyMovement : MonoBehaviour
 {
-    #region Variables Generales
-    [SerializeField] Enemy enemyData;
-
-    [Header("Movement Speed")]
-    [SerializeField] float patrolSpeed = 2f; //vel. de patrulla
-    [SerializeField] float chaseSpeed = 5f; //vel. de perseguir
-
-    [Header("Patroling Stats")]
-    [SerializeField] float walkPointRange = 10f; //radio máximo de generación de puntos a perseguir
+    #region State Variables
+    //Puntos: 
     Vector3 walkPoint; //posición del punto random a perseguir
-    bool walkPointSet;
-
-    [Header("Idle Stats")]
-    [SerializeField] float idleTime = 1f;
-
-    [Header("Stop Behavior")]
-    [SerializeField] float minStopDistance = 1.5f;
-    [SerializeField] float maxStopDistance = 3.5f;
-    [SerializeField] float stopTransitionTime = 0.5f;
-    bool isStopping;
+    Vector3 lastPosition; //posición del último walkPoint perseguido
+    
+    //Distancia: 
     float currentStopDistance;
+    
+    //Temporizadores:
     float stopTimer;
-
-    [Header("Stuck Detection")]
-    [SerializeField] float stuckCheckTime = 2f; //tiempo que el agente espera para comprobar si está stuck
-    [SerializeField] float stuckThreshold = 0.1f; //margen de detección de stuck
-    [SerializeField] float maxStuckDuration = 3f; //tiempo máximo de estar stuck
-
     float stuckTimer; //reloj que cuenta el tiempo de estar stuck
     float lastCheckTime; //tiempo de chequeo previo de stuck
     float idleTimer;
-    Vector3 lastPosition; //posición del último walkPoint perseguido
+
+    //Flags
+    bool walkPointSet;
+    bool isStopping;
     #endregion
 
     #region References
+    [SerializeField] Enemy enemyData;
+
     NavMeshAgent agent;
     EnemyStateMachine fsm;
     VisionSystem vision;
@@ -84,7 +71,7 @@ public class EnemyMovement : MonoBehaviour
     //Estado patrulla: Busca puntos aleatorios de patrulla en el terreno y se mueve entre ellos lentamente 
     void HandlePatrol()
     {
-        agent.speed = patrolSpeed;
+        agent.speed = enemyData.patrolSpeed;
 
         // Generar un punto si no hay walkPoint
         if (!walkPointSet)
@@ -97,7 +84,7 @@ public class EnemyMovement : MonoBehaviour
         {
             if (agent.destination != walkPoint)
             {
-                agent.speed = Mathf.Lerp(agent.speed, chaseSpeed, Time.deltaTime * 3f);
+                agent.speed = Mathf.Lerp(agent.speed, enemyData.chaseSpeed, Time.deltaTime * 3f);
                 agent.SetDestination(walkPoint);
             }
                 
@@ -106,7 +93,7 @@ public class EnemyMovement : MonoBehaviour
             if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
             {
                 walkPointSet = false;
-                idleTimer = idleTime;
+                idleTimer = enemyData.idleTime;
                 OnIdleEnter?.Invoke();
             }
         }
@@ -120,7 +107,7 @@ public class EnemyMovement : MonoBehaviour
         while (!walkPointSet && attempts < maxAttempts)
         {
             attempts++;
-            Vector3 randomPoint = transform.position + new Vector3(UnityEngine.Random.Range(-walkPointRange, walkPointRange), 0, UnityEngine.Random.Range(-walkPointRange, walkPointRange));
+            Vector3 randomPoint = transform.position + new Vector3(UnityEngine.Random.Range(-enemyData.walkPointRange, enemyData.walkPointRange), 0, UnityEngine.Random.Range(-enemyData.walkPointRange, enemyData.walkPointRange));
 
             if (NavMesh.SamplePosition(randomPoint, out NavMeshHit hit, 2f, NavMesh.AllAreas))
             {
@@ -130,7 +117,7 @@ public class EnemyMovement : MonoBehaviour
                     walkPoint = hit.position;
                     walkPointSet = true;
 
-                    agent.speed = Mathf.Lerp(agent.speed, chaseSpeed, Time.deltaTime * 3f);
+                    agent.speed = Mathf.Lerp(agent.speed, enemyData.chaseSpeed, Time.deltaTime * 3f);
                     agent.SetDestination(walkPoint);
                 }
             }
@@ -160,7 +147,7 @@ public class EnemyMovement : MonoBehaviour
 
         float distance = Vector3.Distance(transform.position, vision.Target.position);
 
-        agent.speed = chaseSpeed;
+        agent.speed = enemyData.chaseSpeed;
 
         // Si el player entra en el área de parada
         if (vision.IsPlayerInStopArea)
@@ -168,7 +155,7 @@ public class EnemyMovement : MonoBehaviour
             if (!isStopping)
             {
                 // Genera una distancia aleatoria y marca que se está deteniendo
-                currentStopDistance = UnityEngine.Random.Range(minStopDistance, maxStopDistance);
+                currentStopDistance = UnityEngine.Random.Range(enemyData.minStopDistance, enemyData.maxStopDistance);
                 isStopping = true;
                 stopTimer = 0f; //reinicia temporizador de frenado
             }
@@ -178,10 +165,10 @@ public class EnemyMovement : MonoBehaviour
                 stopTimer += Time.deltaTime;
 
                 //Calcular el factor de interpolación
-                float t = Mathf.Clamp01(stopTimer / stopTransitionTime);
+                float t = Mathf.Clamp01(stopTimer / enemyData.stopTransitionTime);
 
                 //Lerp de velocidad: de chaseSpeed a 0
-                agent.speed = Mathf.Lerp(chaseSpeed, 0f, t);
+                agent.speed = Mathf.Lerp(enemyData.chaseSpeed, 0f, t);
 
                 //Mantiene al agente activo para conservar rotación automática
                 agent.SetDestination(transform.position);
@@ -203,7 +190,7 @@ public class EnemyMovement : MonoBehaviour
             stopTimer = 0f;
         }
         //Si esta afuera del rango de parada, retoma persecución
-        agent.speed = Mathf.Lerp(agent.speed, chaseSpeed, Time.deltaTime * 3f);
+        agent.speed = Mathf.Lerp(agent.speed, enemyData.chaseSpeed, Time.deltaTime * 3f);
         agent.SetDestination(vision.Target.position);
     }
     #endregion
@@ -211,16 +198,16 @@ public class EnemyMovement : MonoBehaviour
     #region Stuck Detection
     void CheckIfStuck()
     {
-        if(Time.time - lastCheckTime > stuckCheckTime)
+        if(Time.time - lastCheckTime > enemyData.stuckCheckTime)
         {
             float distMoved = Vector3.Distance(transform.position, lastPosition);
 
-            if (distMoved < stuckThreshold && agent.hasPath)
-                stuckTimer += stuckCheckTime;
+            if (distMoved < enemyData.stuckThreshold && agent.hasPath)
+                stuckTimer += enemyData.stuckCheckTime;
             else
                 stuckTimer = 0;
 
-            if(stuckTimer >= maxStuckDuration)
+            if(stuckTimer >= enemyData.maxStuckDuration)
             {
                 walkPointSet = false;
                 agent.SetDestination(transform.position);

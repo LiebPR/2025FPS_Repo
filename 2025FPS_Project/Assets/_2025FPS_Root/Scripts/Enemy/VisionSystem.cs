@@ -9,19 +9,10 @@ using UnityEngine.AI;
 /// </summary>
 public class VisionSystem : MonoBehaviour
 {
-    #region General Variables
-    [SerializeField] Enemy enemyData;
-
-    [Header("Config")]
-    [SerializeField] float perceptionDelay = 0.5f;
-    [SerializeField] float lostDelay = 0.5f;
     [SerializeField] Transform visionPoint;
-
-    [SerializeField] float stopAreaRadius = 2f; //radio del área donde el enemigo se detiene
-
+    #region State Variables
     float lostTimer = 0f;
     float perceptionTimer = 0f;
-
     bool canSeeTarget;
     bool isPlayerInPerceptionArea;
     bool visionEnable = true; 
@@ -30,6 +21,8 @@ public class VisionSystem : MonoBehaviour
     #endregion
 
     #region References
+    [SerializeField] Enemy enemyData;
+
     NavMeshAgent agent;
     EnemyStateMachine stateMachine;
     #endregion
@@ -85,7 +78,7 @@ public class VisionSystem : MonoBehaviour
         //Detección Frontal
         if(inCone && !obstacle)
         {
-            lostTimer = lostDelay;
+            lostTimer = enemyData.lostDelay;
             canSeeTarget = true;
         }
         else
@@ -104,20 +97,20 @@ public class VisionSystem : MonoBehaviour
             if (!isPlayerInPerceptionArea)
             {
                 isPlayerInPerceptionArea = true;
-                perceptionTimer = perceptionDelay;
+                perceptionTimer = enemyData.perceptionDelay;
             }
 
             perceptionTimer -= Time.deltaTime;
             if(perceptionTimer <= 0f)
             {
                 canSeeTarget = true;
-                perceptionTimer = perceptionDelay;
+                perceptionTimer = enemyData.perceptionDelay;
             }
         }
         else
         {
             isPlayerInPerceptionArea = false;
-            perceptionTimer = perceptionDelay;
+            perceptionTimer = enemyData.perceptionDelay;
         }
 
         //Eventos
@@ -193,13 +186,13 @@ public class VisionSystem : MonoBehaviour
             else
             {
                 //Si ya lo ve, reiniciamos el temporizador
-                perceptionTimer = perceptionDelay;
+                perceptionTimer = enemyData.perceptionDelay;
                 return true; 
             }
         }
 
         //Si hay detección válida, reiniciamos el temporizador
-        perceptionTimer = perceptionDelay;
+        perceptionTimer = enemyData.perceptionDelay;
         return false;
     }
     void CheckStopArea()
@@ -211,7 +204,7 @@ public class VisionSystem : MonoBehaviour
         }
 
         float distance = Vector3.Distance(visionPoint.position, Target.position);
-        IsPlayerInStopArea = distance <= stopAreaRadius;
+        IsPlayerInStopArea = distance <= enemyData.stopAreaRadius;
     }
     #endregion
 
@@ -266,7 +259,7 @@ public class VisionSystem : MonoBehaviour
 
         // Área de parada
         Gizmos.color = new Color(1f, 0.3f, 0.3f, visionEnable ? 1f : 0.2f);
-        Gizmos.DrawWireSphere(visionPoint.position, stopAreaRadius);
+        Gizmos.DrawWireSphere(visionPoint.position, enemyData.stopAreaRadius);
     }
     #endregion
 }

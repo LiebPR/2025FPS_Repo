@@ -32,7 +32,6 @@ public class EnemyPerceptionController : MonoBehaviour
                 break;
             case EnemyState.Alert:
             case EnemyState.Chase:
-            case EnemyState.Attack:
                 listen?.SetListenActive(false); //Escucha desactivada, visión activada
                 if(vision != null) vision.EnableConeVision(true);
                 break;

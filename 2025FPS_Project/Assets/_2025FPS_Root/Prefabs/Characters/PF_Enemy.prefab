@@ -386,11 +386,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dd49537be0e6b3146a42f13759ab4f00, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enemyData: {fileID: 11400000, guid: c2eb823233453c0459dd72b4a1ea3a48, type: 2}
-  perceptionDelay: 0.5
-  lostDelay: 0.5
   visionPoint: {fileID: 1407380646861190733}
-  stopAreaRadius: 5
+  enemyData: {fileID: 11400000, guid: c2eb823233453c0459dd72b4a1ea3a48, type: 2}
 --- !u!114 &1679341798918562745
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -403,11 +400,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d83232ffcb29c1a4f99944a32db6eaeb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  closeRange: 5
-  mediumRange: 10
-  longRange: 20
-  lostDelay: 1
-  debugLogs: 1
+  enemyData: {fileID: 11400000, guid: c2eb823233453c0459dd72b4a1ea3a48, type: 2}
 --- !u!114 &1854022684874694359
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -421,16 +414,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyData: {fileID: 11400000, guid: c2eb823233453c0459dd72b4a1ea3a48, type: 2}
-  patrolSpeed: 2
-  chaseSpeed: 5
-  walkPointRange: 10
-  idleTime: 1
-  minStopDistance: 4
-  maxStopDistance: 5
-  stopTransitionTime: 0.5
-  stuckCheckTime: 2
-  stuckThreshold: 0.1
-  maxStuckDuration: 3
 --- !u!195 &8616460376851589167
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -465,6 +448,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff442d65e5dbda540b15fd45bf3bc56e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  enemyData: {fileID: 11400000, guid: c2eb823233453c0459dd72b4a1ea3a48, type: 2}
 --- !u!114 &9139925999018009440
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -519,10 +503,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shootPoint: {fileID: 5301221107631865196}
-  impactLayer:
-    serializedVersion: 2
-    m_Bits: 392
-  damage: 10
-  range: 6
-  shootingCooldown: 1
-  attackRange: 9
+  enemyData: {fileID: 11400000, guid: c2eb823233453c0459dd72b4a1ea3a48, type: 2}

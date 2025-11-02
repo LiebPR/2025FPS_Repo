@@ -8,18 +8,7 @@ using UnityEngine;
 /// </summary>
 public class ListenSystem : MonoBehaviour
 {
-    #region General Variables
-    [Header("Hearing Ranges")]
-    [SerializeField] float closeRange = 25f; //escucha cualquier ruido
-    [SerializeField] float mediumRange = 60f; //escucha alguno ruidos
-    [SerializeField] float longRange = 100f; //ecucha los disparos
-
-    [Header("Audio Lost Settings")]
-    [SerializeField] float lostDelay = 1.5f; //tiempo de perder la escucha
-
-    [Header("Activate logs")]
-    [SerializeField] bool debugLogs = false;
-
+    #region State Variables
     bool iListen; //flag que controla si se está escuchando o no
     bool hasListenedOnce; //previene llamadas multiples de eventos inecesarias
     bool listenEnabled = true; //flag para permitir escuchar
@@ -28,9 +17,11 @@ public class ListenSystem : MonoBehaviour
     #endregion
 
     #region Referencias
-    VisionSystem vision;
+    [SerializeField] Enemy enemyData;
+
     FPSController fpsController;
     GunSystem gunSystem;
+    VisionSystem vision;
     #endregion
 
     #region Events
@@ -40,9 +31,9 @@ public class ListenSystem : MonoBehaviour
 
     private void Awake()
     {
-        vision = GetComponent<VisionSystem>();
-        fpsController =FindFirstObjectByType<FPSController>();
+        fpsController = FindFirstObjectByType<FPSController>();
         gunSystem = FindFirstObjectByType<GunSystem>();
+        vision = GetComponent<VisionSystem>();
     }
 
     private void Update()
@@ -52,7 +43,7 @@ public class ListenSystem : MonoBehaviour
         EvaluateHearing();
     }
 
-    #region Core Logic
+    #region Hearing Logic
     void EvaluateHearing()
     {
         if (!listenEnabled)
@@ -70,15 +61,15 @@ public class ListenSystem : MonoBehaviour
         iListen = false;
 
         //Condiciones de escuchar por rango
-        if(gunSystem.IsShooting && distanceToPlayer <= longRange)
+        if(gunSystem.IsShooting && distanceToPlayer <= enemyData.longHearingRange)
         {
             iListen = true;
         }
-        else if(distanceToPlayer <= mediumRange && fpsController.IsSprinting)
+        else if(distanceToPlayer <= enemyData.mediumHearingRange && fpsController.IsSprinting)
         {
             iListen = true;
         }
-        else if (distanceToPlayer <= closeRange && fpsController.HasMovementInput() && !fpsController.IsCrouching)
+        else if (distanceToPlayer <= enemyData.closeHearingRange && fpsController.HasMovementInput() && fpsController.IsCrouching)
         {
             iListen = true;
         }
@@ -86,7 +77,7 @@ public class ListenSystem : MonoBehaviour
         // Manejo de temporizador de pérdida
         if (iListen)
         {
-        lostTimer = lostDelay; // resetea temporizador si todavía escucha
+            lostTimer = enemyData.lostHearingDelay; // resetea temporizador si todavía escucha
         }
         else
         {
@@ -108,14 +99,14 @@ public class ListenSystem : MonoBehaviour
             {
                 hasListenedOnce = true;
                 OnListenPlayer?.Invoke(fpsController.transform);
-                if (debugLogs) Debug.Log($"[ListenSystem] Escuchando al jugador a {distanceToPlayer:F1}m.");
+                if (enemyData.debugLogs) Debug.Log($"[ListenSystem] Escuchando al jugador a {distanceToPlayer:F1}m.");
             }
         }
         else if (!iListen && previousListen)
         {
             hasListenedOnce = false;
             OnStopListen?.Invoke(fpsController.transform);
-            if (debugLogs) Debug.Log("[ListenSystem] Se dejó de escuchar al jugador");
+            if (enemyData.debugLogs) Debug.Log("[ListenSystem] Se dejó de escuchar al jugador");
         }
     }
     #endregion
@@ -137,25 +128,26 @@ public class ListenSystem : MonoBehaviour
     #region Gizmos
     private void OnDrawGizmosSelected()
     {
+        if(enemyData == null) return; 
         // Si no está activo, dibujar todo en gris
         if (!listenEnabled)
         {
             Gizmos.color = Color.gray;
-            Gizmos.DrawWireSphere(transform.position, closeRange);
-            Gizmos.DrawWireSphere(transform.position, mediumRange);
-            Gizmos.DrawWireSphere(transform.position, longRange);
+            Gizmos.DrawWireSphere(transform.position, enemyData.closeHearingRange);
+            Gizmos.DrawWireSphere(transform.position, enemyData.mediumHearingRange);
+            Gizmos.DrawWireSphere(transform.position, enemyData.longHearingRange);
             return;
         }
 
         // Escucha activa: dibujar colores normales
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, closeRange);
+        Gizmos.DrawWireSphere(transform.position, enemyData.closeHearingRange);
 
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, mediumRange);
+        Gizmos.DrawWireSphere(transform.position, enemyData.mediumHearingRange);
 
         Gizmos.color = Color.green;
-        Gizmos.DrawWireSphere(transform.position, longRange);
+        Gizmos.DrawWireSphere(transform.position, enemyData.longHearingRange);
     }
     #endregion
 }

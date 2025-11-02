@@ -7,23 +7,17 @@ using UnityEngine;
 /// </summary>
 public class EnemyGunSystem : MonoBehaviour
 {
-    #region General Variables
-    [Header("General References")]
-    [SerializeField] Transform shootPoint; //punto de disparo del enemigo
-    [SerializeField] LayerMask impactLayer; //capas con las que puede colisionar el raycast
+    [SerializeField] Transform shootPoint;
 
-    [Header("Wapon Parameters")]
-    [SerializeField] int damage = 10;
-    [SerializeField] float range = 10f;
-    [SerializeField] float shootingCooldown = 1f;
-    [SerializeField] float attackRange = 20f; //distancia máxima a la que puede atacar
-
+    #region State Variables
     bool canShoot = true;
     RaycastHit hit;
     Coroutine shootingRoutine;
     #endregion
 
     #region References
+    [SerializeField] Enemy enemyData;
+
     EnemyStateMachine fsm;
     VisionSystem vision;
     #endregion
@@ -53,7 +47,7 @@ public class EnemyGunSystem : MonoBehaviour
     {
         canShoot = false;
         Shoot();
-        yield return new WaitForSeconds(shootingCooldown);
+        yield return new WaitForSeconds(enemyData.shootingCooldown);
         canShoot = true;
     }
 
@@ -64,13 +58,13 @@ public class EnemyGunSystem : MonoBehaviour
         //Dispara solo hacia adelante, según la rotación actual del enemigo
         Vector3 direction = shootPoint.forward;
 
-        if(Physics.Raycast(shootPoint.position, direction, out hit, range, impactLayer))
+        if(Physics.Raycast(shootPoint.position, direction, out hit, enemyData.range, enemyData.impactLayer))
         {
-            Debug.DrawRay(shootPoint.position, direction * range, Color.cyan, 1f);
+            Debug.DrawRay(shootPoint.position, direction * enemyData.range, Color.cyan, 1f);
 
             if(hit.collider.TryGetComponent(out Health health))
             {
-                health.TakeDamage(damage);
+                health.TakeDamage(enemyData.damage);
             }
         }
     }
@@ -92,7 +86,7 @@ public class EnemyGunSystem : MonoBehaviour
         if(vision.Target == null) return false;
 
         float distance = Vector3.Distance(transform.position, vision.Target.position);
-        return distance <= attackRange;
+        return distance <= enemyData.attackRange;
     }
     #endregion
 
@@ -101,7 +95,7 @@ public class EnemyGunSystem : MonoBehaviour
     {
         //Visualización del área de ataque
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
+        Gizmos.DrawWireSphere(transform.position, enemyData.attackRange);
     }
     #endregion
 }

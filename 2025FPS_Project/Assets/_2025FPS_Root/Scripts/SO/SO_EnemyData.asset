@@ -12,18 +12,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 444a0354e1cb94c45b644d239ae73916, type: 3}
   m_Name: SO_EnemyData
   m_EditorClassIdentifier: 
-  walkSpeed: 3
-  chaseSpeed: 6
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 256
+  debugLogs: 0
   visionRadius: 5
   visionAngle: 80
   perceptionRadius: 2
   obstacleMask:
     serializedVersion: 2
+    m_Bits: 256
+  stopAreaRadius: 2
+  minStopDistance: 1.5
+  maxStopDistance: 3.5
+  stopTransitionTime: 0.5
+  perceptionDelay: 0.5
+  lostDelay: 0.5
+  closeHearingRange: 5
+  mediumHearingRange: 10
+  longHearingRange: 20
+  lostHearingDelay: 1
+  groundLayer:
+    serializedVersion: 2
     m_Bits: 8
-  alertTime: 3
+  patrolSpeed: 2
+  walkPointRange: 10
+  chaseSpeed: 6
+  idleTime: 1
+  stuckCheckTime: 2
+  stuckThreshold: 0.1
+  maxStuckDuration: 3
+  impactLayer:
+    serializedVersion: 2
+    m_Bits: 392
   damage: 10
-  attackRangeRadius: 5
-  vida: 10
+  range: 6
+  shootingCooldown: 1
+  attackRange: 9

@@ -187,6 +187,7 @@ GameObject:
   - component: {fileID: 8061097929383227906}
   - component: {fileID: 2098807969975776716}
   - component: {fileID: 1927863503620718146}
+  - component: {fileID: 674618817941860676}
   m_Layer: 7
   m_Name: PF_Player
   m_TagString: Player
@@ -331,6 +332,7 @@ MonoBehaviour:
   weaponMesh: {fileID: 2678244781434658598}
   weaponRecoilBack: 0.05
   weaponRecoilSpeed: 5
+  weaponDamping: 10
 --- !u!114 &4789075039261063539
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -524,6 +526,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6cdd1f29a4f85464180bca5a62634ddc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &674618817941860676
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1801987506058558577}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80d750b2ebaa662418ed5d5d7170624b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cameraSource: {fileID: 6638849855594031741}
+  interactRange: 2
+  interactMask:
+    serializedVersion: 2
+    m_Bits: 1024
+  interactionCooldown: 0.2
+  debugRay: 1
 --- !u!1 &7044904031915176628
 GameObject:
   m_ObjectHideFlags: 0

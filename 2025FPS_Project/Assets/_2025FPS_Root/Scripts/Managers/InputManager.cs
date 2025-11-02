@@ -19,6 +19,10 @@ public class InputManager : MonoBehaviour
     //Para GunSystem
     public static event Action OnShootEvent;
     public static event Action OnReloadEvent;
+
+    //Para InteractionSystem
+    public static event Action OnInteractHoldStart;
+    public static event Action OnInteractHoldEnd;
     #endregion
 
     private void Awake()
@@ -54,6 +58,10 @@ public class InputManager : MonoBehaviour
 
         //Recargar
         inputActions.Gameplay.Reload.performed += ctx => OnReloadEvent?.Invoke();
+
+        //Interacción
+        inputActions.Gameplay.Interact.performed += ctx => OnInteractHoldStart?.Invoke();
+        inputActions.Gameplay.Interact.canceled += ctx => OnInteractHoldEnd?.Invoke();
 
         inputActions.Enable();
     }
@@ -92,5 +100,9 @@ public class InputManager : MonoBehaviour
 
         //Recargar
         inputActions.Gameplay.Reload.performed -= ctx => OnReloadEvent?.Invoke();
+
+        //Interacción
+        inputActions.Gameplay.Interact.performed -= ctx => OnInteractHoldStart?.Invoke();
+        inputActions.Gameplay.Interact.canceled -= ctx => OnInteractHoldEnd?.Invoke();
     }
 }

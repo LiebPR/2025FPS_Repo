@@ -5,13 +5,12 @@ public enum EnemyState
     Patrol,
     Idle,
     Alert,
-    Chase,
-    Attack
+    Chase
 }
 
 public class EnemyStateMachine : MonoBehaviour
 {
-
+    [SerializeField] Enemy enemyData;
     #region Getter
     public EnemyState currentState { get; private set; } = EnemyState.Patrol;
     #endregion
@@ -24,7 +23,7 @@ public class EnemyStateMachine : MonoBehaviour
     void ChangeState(EnemyState newState)
     {
         if (currentState == newState) return; // No cambiar si ya está en ese estado
-        Debug.Log($"Enemy changed from {currentState} to {newState}");
+        if(enemyData.debugLogs) Debug.Log($"Enemy changed from {currentState} to {newState}");
         currentState = newState;
         OnStateChanged?.Invoke(currentState);
     }
@@ -37,7 +36,6 @@ public class EnemyStateMachine : MonoBehaviour
     public void OnPatrol() => ChangeState(EnemyState.Patrol);
     public void OnAlert() => ChangeState(EnemyState.Alert);
     public void OnIdle() => ChangeState(EnemyState.Idle);
-    public void OnAttack() => ChangeState(EnemyState.Attack);
 
     #endregion
 }

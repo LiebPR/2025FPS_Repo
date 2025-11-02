@@ -6,58 +6,56 @@ public class GunSystem : MonoBehaviour
 {
     #region General Variables
     [Header("General References")]
-    [SerializeField] Camera fpsCam; //ref si disparamos desde el centro de la cam
-    [SerializeField] Transform shootPoint; //ref si queremos disparar desde la punta del cañon
-    [SerializeField] LayerMask impactLayer; //layer con la que el Raycast interactúa
-    RaycastHit hit; //almacén de la información de los objetos con los que impactan los disparos
+    [SerializeField] Camera fpsCam;
+    [SerializeField] Transform shootPoint;
+    [SerializeField] LayerMask impactLayer;
+    RaycastHit hit;
 
     [Header("Weapon Parameters")]
-    [SerializeField] int damage = 10; //daño del arma
-    [SerializeField] float range = 100f; //distancia de disparo
-    [SerializeField] float baseSpreadAngle = 1f; //dispersión base en grados
-    [SerializeField] float moveSpreadMultiplier = 1.5f; //aumento de dispersión al moverse
-    [SerializeField] float sprintSpreadMultiplier = 2f; //aumento de dispersión al moverse
-    [SerializeField] float jumpSpreadMultiplier = 2.5f; //aumento de dispersión al saltar
-    [SerializeField] float shootingCooldown = 0.2f; //tiempo entre disparos
-    [SerializeField] float reloadTime = 1.5f; //tiempo entre disparos
-    [SerializeField] bool allowButtonHold = false; //si se dispara click a click o por mantener
+    [SerializeField] int damage = 10;
+    [SerializeField] float range = 100f;
+    [SerializeField] float baseSpreadAngle = 1f;
+    [SerializeField] float moveSpreadMultiplier = 1.5f;
+    [SerializeField] float sprintSpreadMultiplier = 2f;
+    [SerializeField] float jumpSpreadMultiplier = 2.5f;
+    [SerializeField] float shootingCooldown = 0.2f;
+    [SerializeField] float reloadTime = 1.5f;
+    [SerializeField] bool allowButtonHold = false;
 
     [Header("Recoil Settings")]
-    [SerializeField] float recoilAmount = 2f; //grados que la camara subirá
-    [SerializeField] float recoilSpeed = 10f; //velocidad de subida del recoil
-    [SerializeField] float recoilRecovery = 5f; //velocidad a la que vuelve a la posición original
+    [SerializeField] float recoilAmount = 2f;
+    [SerializeField] float recoilSpeed = 10f;
+    [SerializeField] float recoilRecovery = 5f;
 
     [Header("Bullet Management")]
-    [SerializeField] int ammoSize = 30; //cantidad max de balas por cargador
-    [SerializeField] int bulletsPerTap = 1; //cantidad de balas que se disparan por disparo
-    int bulletsLeft; //cantidad de balas dentro del cargador actual
+    [SerializeField] int ammoSize = 30;
+    [SerializeField] int bulletsPerTap = 1;
+    int bulletsLeft;
 
     [Header("Weapon Recoil References")]
-    [SerializeField] Transform weaponMesh; //referencia al mesh del arma
-    [SerializeField] float weaponRecoilBack = 0.1f; //distancia que retrocede el arma
-    [SerializeField] float weaponRecoilSpeed = 10f; //velocidad de retroceso del arma
+    [SerializeField] Transform weaponMesh;
+    [SerializeField] float weaponRecoilBack = 0.1f;
+    [SerializeField] float weaponRecoilSpeed = 10f;
     Vector3 camCurrentRecoil;
-    Vector3 camTargetRecoil; 
-    Vector3 camOriginalRotation; //rotación original de la cámara
-    Vector3 weaponCurrentRecoil; 
-    Vector3 weaponTargetRecoil; 
-    Vector3 weaponOriginalPosition; //posición original del arma
+    Vector3 camTargetRecoil;
+    Vector3 camOriginalRotation;
+    Vector3 weaponCurrentRecoil;
+    Vector3 weaponTargetRecoil;
+    Vector3 weaponOriginalPosition;
 
     [Header("Damping Mesh")]
     [SerializeField] float weaponDamping = 10f;
-    Vector3 weaponOriginalEuler; //Rotación base del arma
-    Vector3 weaponTargetEuler; //rotación objetivo (según imput horizontal)
-    Vector3 weaponCurrentEuler; //rotación actual interpolada
-
-    [Header("Feedback References")]
-    //[SerializeField] GameObject impactEffect; //Referencia al VFX de impacto de bala
+    Vector3 weaponOriginalEuler;
+    Vector3 weaponTargetEuler;
+    Vector3 weaponCurrentEuler;
 
     Vector3 lastHitPoint;
 
-    //Bools de estado
-    bool shooting; //Indica que estamos disparando
-    bool canShoot; //Indica que en este momento del juego se puede disparar
-    bool reloading; //Indica si estamos en proceso de recarga
+    bool shooting;
+    bool canShoot;
+    bool reloading;
+    bool weaponReloadingAnimation;
+    bool emptyShakeDone;
 
     Coroutine recoilCoroutine;
     #endregion
@@ -74,11 +72,11 @@ public class GunSystem : MonoBehaviour
     private void Awake()
     {
         playerController = GetComponent<FPSController>();
-        bulletsLeft = ammoSize; //Al inicio de la partida, tenemos cargador lleno
+        bulletsLeft = ammoSize;
         canShoot = true;
     }
 
-    #region Input Event Suscription
+    #region Inputs
     private void OnEnable()
     {
         InputManager.OnShootEvent += HandleShoot;
@@ -94,66 +92,47 @@ public class GunSystem : MonoBehaviour
 
     void Start()
     {
-        //impactEffect.SetActive(false); //Apaga el efecto de impacto al iniciar el juego
-        if(weaponMesh != null)
+        if (weaponMesh != null)
         {
-            //Recoil:
             weaponOriginalPosition = weaponMesh.localPosition;
-
-            //Damping
             weaponOriginalEuler = weaponMesh.localEulerAngles;
             weaponCurrentEuler = weaponOriginalEuler;
         }
-
         camOriginalRotation = fpsCam.transform.localEulerAngles;
     }
 
     void Update()
     {
         if (!canShoot || reloading) return;
+
         if (shooting && bulletsLeft > 0 && recoilCoroutine == null)
         {
-            //Inicializar la corrutina de disparo
             StartCoroutine(ShootRoutine());
         }
     }
 
     private void LateUpdate()
     {
-        //RECOIL:
-        //CAMARA: 
-        //Suavizado de movimiento de la cámara hacia el target recoil
+        // CAMARA RECOIL
         camCurrentRecoil = Vector3.Lerp(camCurrentRecoil, camTargetRecoil, Time.deltaTime * recoilSpeed);
         fpsCam.transform.localEulerAngles = camOriginalRotation + camCurrentRecoil;
-
-        //Hacemos que el recoil se disipe con el tiempo
         camTargetRecoil = Vector3.Lerp(camTargetRecoil, Vector3.zero, Time.deltaTime * recoilRecovery);
 
-        //ARMA:
+        // ARMA RECOIL
         if (weaponMesh != null)
         {
-            //Movimiento suave del arma hacia atrás y de vuelta.
             weaponCurrentRecoil = Vector3.Lerp(weaponCurrentRecoil, weaponTargetRecoil, Time.deltaTime * weaponRecoilSpeed);
             weaponMesh.localPosition = weaponOriginalPosition + weaponCurrentRecoil;
-
-            //Volver al punto original suavemente
             weaponTargetRecoil = Vector3.Lerp(weaponTargetRecoil, Vector3.zero, Time.deltaTime * weaponRecoilSpeed);
         }
 
-        //DAMPING: 
-        //ARMA: 
-        if (weaponMesh != null)
+        // DAMPING ARMA (solo si no está recargando)
+        if (weaponMesh != null && !weaponReloadingAnimation)
         {
-            Vector2 mouseDelta = Mouse.current.delta.ReadValue(); // nuevo Input System
-
-            // Definir rotación objetivo según movimiento del mouse
-            weaponTargetEuler.y = weaponOriginalEuler.y + mouseDelta.x * 0.1f; // rotación horizontal
-            weaponTargetEuler.x = weaponOriginalEuler.x - mouseDelta.y * 0.1f; // rotación vertical (invertida para FPS típico)
-
-            // Interpolación suave hacia el objetivo
+            Vector2 mouseDelta = Mouse.current.delta.ReadValue();
+            weaponTargetEuler.y = weaponOriginalEuler.y + mouseDelta.x * 0.1f;
+            weaponTargetEuler.x = weaponOriginalEuler.x - mouseDelta.y * 0.1f;
             weaponCurrentEuler = Vector3.Lerp(weaponCurrentEuler, weaponTargetEuler, Time.deltaTime * weaponDamping);
-
-            // Aplicar rotación
             weaponMesh.localEulerAngles = weaponCurrentEuler;
         }
     }
@@ -161,66 +140,43 @@ public class GunSystem : MonoBehaviour
     #region Shoot
     IEnumerator ShootRoutine()
     {
-        canShoot = false; //Previene la acumulación por frame de disparos
-        if (!allowButtonHold) shooting = false; //Configuración del disparo por tap
+        canShoot = false;
+        if (!allowButtonHold) shooting = false;
         for (int i = 0; i < bulletsPerTap; i++)
         {
-            if (bulletsLeft <= 0) break; //Segunda prevención de errores
-
+            if (bulletsLeft <= 0) break;
             Shoot();
             bulletsLeft--;
         }
-
         yield return new WaitForSeconds(shootingCooldown);
-        canShoot = true; //Resetea la posibilidad de disparar
-
-        if(bulletsLeft <= 0)
-            shooting = false; //seguridad add al quedarse sin balas.
+        canShoot = true;
+        if (bulletsLeft <= 0) shooting = false;
         recoilCoroutine = null;
     }
 
     void Shoot()
     {
-        //ESTE ES EL MÉTODO MÁS IMPORTANTE
-        //AQUÍ SE DEFINE EL DISPARO POR RAYCAST
-
-        //Almacenar la dirección del disparo
-        Vector3 direction = fpsCam.transform.forward; //dirección base(frontal  de la cámara)
-        
-        //Calcular el spread actual según el estado del jugador
+        Vector3 direction = fpsCam.transform.forward;
         float currentSpread = GetCurrentSpread();
-
-        //Aplicar dispersión angular realista
         float spreadX = Random.Range(-currentSpread, currentSpread);
         float spreadY = Random.Range(-currentSpread, currentSpread);
 
-        Vector3 spreadDirection = fpsCam.transform.forward;
-        spreadDirection += fpsCam.transform.right * Mathf.Tan(spreadX * Mathf.Deg2Rad);
-        spreadDirection += fpsCam.transform.up * Mathf.Tan(spreadY * Mathf.Deg2Rad);
-        spreadDirection.Normalize();
+        Vector3 spreadDir = fpsCam.transform.forward;
+        spreadDir += fpsCam.transform.right * Mathf.Tan(spreadX * Mathf.Deg2Rad);
+        spreadDir += fpsCam.transform.up * Mathf.Tan(spreadY * Mathf.Deg2Rad);
+        spreadDir.Normalize();
 
-        Debug.DrawRay(fpsCam.transform.position, spreadDirection * range, Color.red, 1f);
+        Debug.DrawRay(fpsCam.transform.position, spreadDir * range, Color.red, 1f);
 
-        //DECLARACIÓN DEL RAYCAST
-        //Physics.Raycast(Origen del rayo, dirección, almacén de info de impacto, longitud del rayo, layer a la que impacta (opcional)
-        if (Physics.Raycast(fpsCam.transform.position, spreadDirection, out hit, range, impactLayer))
+        if (Physics.Raycast(fpsCam.transform.position, spreadDir, out hit, range, impactLayer))
         {
-            //AQUI PUEDO CODEAR TODOS LOS EFECTOS QUE QUIERO PARA MI INTERACCIÓN
-            
-            Health health = hit.collider.GetComponent<Health>();
-            if (health == null)
-                health = hit.collider.GetComponentInParent<Health>();
-
+            Health health = hit.collider.GetComponent<Health>() ?? hit.collider.GetComponentInParent<Health>();
             if (health != null)
             {
-                int appliedDamage = damage;
-                if (hit.collider.gameObject.layer == LayerMask.NameToLayer("HeadShoot"))
-                    appliedDamage = 100;
-
+                int appliedDamage = hit.collider.gameObject.layer == LayerMask.NameToLayer("HeadShoot") ? 100 : damage;
                 health.TakeDamage(appliedDamage);
             }
         }
-
         ApplyRecoil();
     }
     #endregion
@@ -228,39 +184,23 @@ public class GunSystem : MonoBehaviour
     #region Spread
     float GetCurrentSpread()
     {
-        float currentSpread = baseSpreadAngle;
+        float spread = baseSpreadAngle;
+        if (playerController == null) return spread;
 
-        if (playerController == null)
-            return currentSpread;
+        if (!playerController.IsGrounded) spread *= jumpSpreadMultiplier;
+        if (playerController.IsSprinting) spread *= sprintSpreadMultiplier;
+        else if (playerController.HasMovementInput()) spread *= moveSpreadMultiplier;
+        if (playerController.IsCrouching) spread *= 0.75f;
 
-        // Multiplicadores acumulativos según estado
-        if (!playerController.IsGrounded)
-            currentSpread *= jumpSpreadMultiplier;
-
-        if (playerController.IsSprinting)
-            currentSpread *= sprintSpreadMultiplier;
-        else if (playerController.HasMovementInput())
-            currentSpread *= moveSpreadMultiplier;
-
-        if (playerController.IsCrouching)
-            currentSpread *= 0.75f; // más precisión al estar agachado
-
-        return currentSpread;
+        return spread;
     }
     #endregion
 
     #region Recoil
     public void ApplyRecoil()
     {
-        //Añadimos un poco de kick vertical (hacia arriba) 
         camTargetRecoil.x -= recoilAmount;
-
-        //Recoil acumulativo del arma
-        if (weaponMesh != null)
-        {
-            //Recoil hacía atras
-            weaponTargetRecoil = new Vector3(0f, 0f, -weaponRecoilBack);
-        }
+        if (weaponMesh != null) weaponTargetRecoil = new Vector3(0f, 0f, -weaponRecoilBack);
     }
     #endregion
 
@@ -269,11 +209,11 @@ public class GunSystem : MonoBehaviour
     {
         if (bulletsLeft < ammoSize && !reloading)
         {
-            shooting = false; //evita disparos fantasma durante la recarga
-            canShoot = false; //bloquea la posibilidad de disparar
+            shooting = false;
+            canShoot = false;
             StartCoroutine(ReloadRoutine());
         }
-        if(recoilCoroutine != null)
+        if (recoilCoroutine != null)
         {
             StopCoroutine(recoilCoroutine);
             recoilCoroutine = null;
@@ -283,23 +223,91 @@ public class GunSystem : MonoBehaviour
     IEnumerator ReloadRoutine()
     {
         reloading = true;
-        //Se llama a la animación de recarga
-        yield return new WaitForSeconds(reloadTime);
+        canShoot = false;
+        weaponReloadingAnimation = true;
+
+        if (weaponMesh != null)
+        {
+            Quaternion originalRot = weaponMesh.localRotation;
+            Quaternion targetRot = originalRot * Quaternion.Euler(5f, 10f, 20f);
+            float timer = 0f;
+
+            // Animación ida
+            while (timer < reloadTime * 0.5f)
+            {
+                timer += Time.deltaTime;
+                float t = timer / (reloadTime * 0.5f);
+                weaponMesh.localRotation = Quaternion.Slerp(originalRot, targetRot, t);
+                yield return null;
+            }
+
+            // Animación vuelta
+            timer = 0f;
+            while (timer < reloadTime * 0.5f)
+            {
+                timer += Time.deltaTime;
+                float t = timer / (reloadTime * 0.5f);
+                weaponMesh.localRotation = Quaternion.Slerp(targetRot, originalRot, t);
+                yield return null;
+            }
+
+            weaponMesh.localRotation = originalRot;
+        }
+        else
+        {
+            yield return new WaitForSeconds(reloadTime);
+        }
+
         bulletsLeft = ammoSize;
         reloading = false;
-        canShoot = true; //cuando la recarga termina se reavilita el disparo.
+        weaponReloadingAnimation = false;
+        shooting = false;
+        canShoot = true;
+        emptyShakeDone = false;
     }
     #endregion
 
-    #region Inputs Handlers
+    #region Shake
+    IEnumerator EmptyShakeRoutine()
+    {
+        if (weaponMesh == null) yield break;
+
+        weaponReloadingAnimation = true; // bloquea damping mientras ocurre la animación
+        Quaternion originalRot = weaponMesh.localRotation;
+
+        float duration = 0.4f; // duración total de la animación
+        float elapsed = 0f;
+
+        // Animación tipo NO: de lado a lado en Z suavemente
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / duration;
+
+            // Oscilación en Z: usa Sin para suavidad
+            float zRotation = Mathf.Sin(t * Mathf.PI * 2f) * 5f; // 5 grados a cada lado
+            weaponMesh.localRotation = originalRot * Quaternion.Euler(0f, 0f, zRotation);
+
+            yield return null;
+        }
+
+        // Reset exacto
+        weaponMesh.localRotation = originalRot;
+        weaponReloadingAnimation = false;
+    }
+    #endregion
+
+    #region Inputs
     void HandleShoot()
     {
         shooting = true;
-    }
 
-    void HandleReload()
-    {
-        Reload();
-    }
+        // Si no hay balas, lanzar la animación de sacudida
+        if (bulletsLeft <= 0 && !weaponReloadingAnimation)
+        {
+            StartCoroutine(EmptyShakeRoutine());
+        }
+    } 
+    void HandleReload() => Reload();
     #endregion
 }
