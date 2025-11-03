@@ -80,6 +80,7 @@ public class VisionSystem : MonoBehaviour
         {
             lostTimer = enemyData.lostDelay;
             canSeeTarget = true;
+            LastKnownPosition = Target.position;
         }
         else
         {
@@ -117,12 +118,10 @@ public class VisionSystem : MonoBehaviour
         if(canSeeTarget && !previusSee)
         {
             OnTargetSee?.Invoke(Target);
-            LastKnownPosition = Target.position;
         }
-        else if(!canSeeTarget && previusSee)
+        else if(!canSeeTarget && previusSee && lostTimer <= 0f)
         {
             OnTargetLose?.Invoke(Target);
-            LastKnownPosition = Target.position;
         }
     }
     #endregion

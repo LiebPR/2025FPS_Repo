@@ -40,8 +40,8 @@ public class EnemyEventManager : MonoBehaviour
     private void OnDisable()
     {
         //Vision System
-        visionSystem.OnTargetSee += HandleTargetSee;
-        visionSystem.OnTargetLose += HandleTargetLost;
+        visionSystem.OnTargetSee -= HandleTargetSee;
+        visionSystem.OnTargetLose -= HandleTargetLost;
 
         //Listen System
         listenSystem.OnListenPlayer -= HandleListen;
