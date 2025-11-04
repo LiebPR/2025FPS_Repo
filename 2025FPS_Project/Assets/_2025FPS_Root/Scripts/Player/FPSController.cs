@@ -88,9 +88,19 @@ public class FPSController : MonoBehaviour
 
     void Start()
     {
-        //Lock cursor
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        //Obtener el nombre de la escena actual 
+        string currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+        //Solo bloquear el cursor si estamos en una escena jugable
+        if (currentScene.StartsWith("SCN_AlejandroTask"))
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
 
         //Head bob: 
         camOriginalPos = camHolder.transform.localPosition;
@@ -259,5 +269,9 @@ public class FPSController : MonoBehaviour
         // Evitar sprint si estás agachado
         if (isCrouching) isSprinting = false;
     }
+    #endregion
+
+    #region Cámara
+
     #endregion
 }

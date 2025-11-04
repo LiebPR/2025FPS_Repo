@@ -64,6 +64,13 @@ public class InputManager : MonoBehaviour
         inputActions.Gameplay.Interact.canceled += ctx => OnInteractHoldEnd?.Invoke();
 
         inputActions.Enable();
+
+        //Suscribirse al cambio de estado del GameManager
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnStateChanged += HandleGameStateChanged;
+            HandleGameStateChanged(GameManager.Instance.CurrentState);
+        }
     }
 
     private void Shoot_performed(InputAction.CallbackContext obj)
@@ -104,5 +111,25 @@ public class InputManager : MonoBehaviour
         //Interacción
         inputActions.Gameplay.Interact.performed -= ctx => OnInteractHoldStart?.Invoke();
         inputActions.Gameplay.Interact.canceled -= ctx => OnInteractHoldEnd?.Invoke();
+
+        // Desuscribirse
+        if (GameManager.Instance != null)
+            GameManager.Instance.OnStateChanged -= HandleGameStateChanged;
     }
+
+    #region Control de Cursor
+    void HandleGameStateChanged(GameManager.GameState newState)
+    {
+        bool isPlaying = newState == GameManager.GameState.Playing;
+
+        Cursor.lockState = isPlaying ? CursorLockMode.Locked : CursorLockMode.None;
+        Cursor.visible = !isPlaying;
+
+        // Deshabilita los controles fuera del modo "Playing"
+        if (isPlaying)
+            inputActions.Gameplay.Enable();
+        else
+            inputActions.Gameplay.Disable();
+    }
+    #endregion
 }

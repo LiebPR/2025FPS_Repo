@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class GunSystem : MonoBehaviour
 {
@@ -10,6 +11,12 @@ public class GunSystem : MonoBehaviour
     [SerializeField] Transform shootPoint;
     [SerializeField] LayerMask impactLayer;
     RaycastHit hit;
+
+    [Header("Ammo UI")]
+    [SerializeField] Image ammoBar; //image tipo fill
+    [SerializeField] int maxAmmoPercent = 100; //max percentaje
+    float currentAmmoPercent; //porcentaje actual
+    float percentPerBullet; 
 
     [Header("Weapon Parameters")]
     [SerializeField] int damage = 10;
@@ -54,7 +61,6 @@ public class GunSystem : MonoBehaviour
     bool shooting;
     bool canShoot;
     bool reloading;
-    bool weaponReloadingAnimation;
     bool emptyShakeDone;
 
     Coroutine recoilCoroutine;
@@ -63,6 +69,8 @@ public class GunSystem : MonoBehaviour
     #region Getters
     public bool IsShooting => shooting;
     public Vector3 LastHitPoint => lastHitPoint;
+    public int BulletsLeft => bulletsLeft;
+    public int AmmoSize => ammoSize;
     #endregion
 
     #region References
@@ -80,13 +88,11 @@ public class GunSystem : MonoBehaviour
     private void OnEnable()
     {
         InputManager.OnShootEvent += HandleShoot;
-        InputManager.OnReloadEvent += HandleReload;
     }
 
     private void OnDisable()
     {
         InputManager.OnShootEvent -= HandleShoot;
-        InputManager.OnReloadEvent -= HandleReload;
     }
     #endregion
 
@@ -99,6 +105,11 @@ public class GunSystem : MonoBehaviour
             weaponCurrentEuler = weaponOriginalEuler;
         }
         camOriginalRotation = fpsCam.transform.localEulerAngles;
+
+        //Porcentaje de munición
+        currentAmmoPercent = maxAmmoPercent;
+        percentPerBullet = (float)maxAmmoPercent / ammoSize;
+        UpdateAmmoUI();
     }
 
     void Update()
@@ -127,7 +138,7 @@ public class GunSystem : MonoBehaviour
         }
 
         // DAMPING ARMA (solo si no está recargando)
-        if (weaponMesh != null && !weaponReloadingAnimation)
+        if (weaponMesh != null)
         {
             Vector2 mouseDelta = Mouse.current.delta.ReadValue();
             weaponTargetEuler.y = weaponOriginalEuler.y + mouseDelta.x * 0.1f;
@@ -147,6 +158,9 @@ public class GunSystem : MonoBehaviour
             if (bulletsLeft <= 0) break;
             Shoot();
             bulletsLeft--;
+            currentAmmoPercent -= percentPerBullet;
+            if (currentAmmoPercent < 0) currentAmmoPercent = 0;
+            UpdateAmmoUI();
         }
         yield return new WaitForSeconds(shootingCooldown);
         canShoot = true;
@@ -204,75 +218,11 @@ public class GunSystem : MonoBehaviour
     }
     #endregion
 
-    #region Reload
-    void Reload()
-    {
-        if (bulletsLeft < ammoSize && !reloading)
-        {
-            shooting = false;
-            canShoot = false;
-            StartCoroutine(ReloadRoutine());
-        }
-        if (recoilCoroutine != null)
-        {
-            StopCoroutine(recoilCoroutine);
-            recoilCoroutine = null;
-        }
-    }
-
-    IEnumerator ReloadRoutine()
-    {
-        reloading = true;
-        canShoot = false;
-        weaponReloadingAnimation = true;
-
-        if (weaponMesh != null)
-        {
-            Quaternion originalRot = weaponMesh.localRotation;
-            Quaternion targetRot = originalRot * Quaternion.Euler(5f, 10f, 20f);
-            float timer = 0f;
-
-            // Animación ida
-            while (timer < reloadTime * 0.5f)
-            {
-                timer += Time.deltaTime;
-                float t = timer / (reloadTime * 0.5f);
-                weaponMesh.localRotation = Quaternion.Slerp(originalRot, targetRot, t);
-                yield return null;
-            }
-
-            // Animación vuelta
-            timer = 0f;
-            while (timer < reloadTime * 0.5f)
-            {
-                timer += Time.deltaTime;
-                float t = timer / (reloadTime * 0.5f);
-                weaponMesh.localRotation = Quaternion.Slerp(targetRot, originalRot, t);
-                yield return null;
-            }
-
-            weaponMesh.localRotation = originalRot;
-        }
-        else
-        {
-            yield return new WaitForSeconds(reloadTime);
-        }
-
-        bulletsLeft = ammoSize;
-        reloading = false;
-        weaponReloadingAnimation = false;
-        shooting = false;
-        canShoot = true;
-        emptyShakeDone = false;
-    }
-    #endregion
-
     #region Shake
     IEnumerator EmptyShakeRoutine()
     {
         if (weaponMesh == null) yield break;
 
-        weaponReloadingAnimation = true; // bloquea damping mientras ocurre la animación
         Quaternion originalRot = weaponMesh.localRotation;
 
         float duration = 0.4f; // duración total de la animación
@@ -293,7 +243,31 @@ public class GunSystem : MonoBehaviour
 
         // Reset exacto
         weaponMesh.localRotation = originalRot;
-        weaponReloadingAnimation = false;
+    }
+    #endregion
+
+    #region Ammo Size
+    void UpdateAmmoUI()
+    {
+        if (ammoBar != null)
+        {
+            ammoBar.fillAmount = currentAmmoPercent / maxAmmoPercent;
+        }
+    }
+
+    public int PickUpAmmo(int amount)
+    {
+        if (bulletsLeft >= ammoSize)
+            return 0; // No hay espacio
+
+        int space = ammoSize - bulletsLeft;
+        int ammoToAdd = Mathf.Min(amount, space);
+        bulletsLeft += ammoToAdd;
+
+        currentAmmoPercent = ((float)bulletsLeft / ammoSize) * maxAmmoPercent;
+        UpdateAmmoUI();
+
+        return ammoToAdd; // Devuelve cuántas balas realmente se recogieron
     }
     #endregion
 
@@ -303,11 +277,10 @@ public class GunSystem : MonoBehaviour
         shooting = true;
 
         // Si no hay balas, lanzar la animación de sacudida
-        if (bulletsLeft <= 0 && !weaponReloadingAnimation)
+        if (bulletsLeft <= 0)
         {
             StartCoroutine(EmptyShakeRoutine());
         }
     } 
-    void HandleReload() => Reload();
     #endregion
 }
