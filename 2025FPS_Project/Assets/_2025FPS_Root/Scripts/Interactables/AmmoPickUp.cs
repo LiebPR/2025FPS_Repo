@@ -2,59 +2,57 @@ using UnityEngine;
 
 public class AmmoPickUp : MonoBehaviour, IInteractable
 {
-    [SerializeField] int ammoAmount = 10;              // Cantidad de balas que da
+    #region General Variables
+    [SerializeField] int ammoUnits = 1;       // Unidades de munición que da este pickup (editable)
     [Header("Highlight")]
-    [SerializeField] Material highlightMaterial;       // Material cuando está apuntado
+    [SerializeField] Material highlightMaterial;
+    #endregion
 
-    private Renderer objRenderer;
-    private Material originalMaterial;
-
+    #region References
+    Renderer objRenderer;
+    Material originalMaterial;
     GunSystem playerGun;
+    Rigidbody rb;
+    #endregion
 
     private void Awake()
     {
         objRenderer = GetComponent<Renderer>();
         if (objRenderer != null)
             originalMaterial = objRenderer.material;
+
+        rb = GetComponent<Rigidbody>();
     }
 
     public void SetPlayerGun(GunSystem gun)
     {
         playerGun = gun;
     }
-
+    //Permite asignar la cantidad desde código (usado por Health al instanciar)
     public void SetAmmoAmount(int amount)
     {
-        ammoAmount = amount;
+        ammoUnits = amount;
     }
 
     #region Interacción
     public void OnPress()
     {
-        if (playerGun == null)
-        {
-            Debug.LogWarning("No se ha asignado GunSystem al pick-up.");
-            return;
-        }
+        if (playerGun == null) return;
 
-        if (playerGun.BulletsLeft >= playerGun.AmmoSize)
+        int given = playerGun.PickUpAmmo(ammoUnits);
+
+        if (given > 0)
         {
-            Debug.Log("Munición al máximo. No puedes recoger más.");
+            AudioManager.Instance.Play("AmmoPickUpTrue");
+            Destroy(gameObject); //solo desaparece si realmente dio algo
         }
         else
         {
-            int before = playerGun.BulletsLeft;
-            playerGun.PickUpAmmo(ammoAmount);
-            int after = playerGun.BulletsLeft;
-            Debug.Log($"Recogido {after - before} balas. Munición actual: {after}/{playerGun.AmmoSize}");
-            Destroy(gameObject); // Se recoge y desaparece
+            AudioManager.Instance.Play("AmmoPickUpFalse");
         }
     }
 
-    public void OnRelease()
-    {
-        // No se necesita lógica aquí
-    }
+    public void OnRelease() { }
     #endregion
 
     #region Highlight
@@ -70,4 +68,12 @@ public class AmmoPickUp : MonoBehaviour, IInteractable
             objRenderer.material = originalMaterial;
     }
     #endregion
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.gameObject.layer == LayerMask.NameToLayer("Ground"))
+        {
+            rb.constraints = RigidbodyConstraints.FreezePosition| RigidbodyConstraints.FreezeRotation;
+        }
+    }
 }

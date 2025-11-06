@@ -54,6 +54,7 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        AudioManager.Instance.StopAllSFXExceptBGM();
         SetState(GameState.GameOver);
         OnGameOver?.Invoke();
         SceneManagerSimple.Instance.LoadScene("SCN_Lose");

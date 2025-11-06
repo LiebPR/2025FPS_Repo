@@ -1,4 +1,4 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -26,7 +26,6 @@ public class GunSystem : MonoBehaviour
     [SerializeField] float sprintSpreadMultiplier = 2f;
     [SerializeField] float jumpSpreadMultiplier = 2.5f;
     [SerializeField] float shootingCooldown = 0.2f;
-    [SerializeField] float reloadTime = 1.5f;
     [SerializeField] bool allowButtonHold = false;
 
     [Header("Recoil Settings")]
@@ -81,6 +80,7 @@ public class GunSystem : MonoBehaviour
     {
         playerController = GetComponent<FPSController>();
         bulletsLeft = ammoSize;
+        currentAmmoPercent = maxAmmoPercent;
         canShoot = true;
     }
 
@@ -106,8 +106,7 @@ public class GunSystem : MonoBehaviour
         }
         camOriginalRotation = fpsCam.transform.localEulerAngles;
 
-        //Porcentaje de municiÛn
-        currentAmmoPercent = maxAmmoPercent;
+        //Porcentaje de munici√≥n
         percentPerBullet = (float)maxAmmoPercent / ammoSize;
         UpdateAmmoUI();
     }
@@ -137,7 +136,7 @@ public class GunSystem : MonoBehaviour
             weaponTargetRecoil = Vector3.Lerp(weaponTargetRecoil, Vector3.zero, Time.deltaTime * weaponRecoilSpeed);
         }
 
-        // DAMPING ARMA (solo si no est· recargando)
+        // DAMPING ARMA (solo si no est√° recargando)
         if (weaponMesh != null)
         {
             Vector2 mouseDelta = Mouse.current.delta.ReadValue();
@@ -162,6 +161,8 @@ public class GunSystem : MonoBehaviour
             if (currentAmmoPercent < 0) currentAmmoPercent = 0;
             UpdateAmmoUI();
         }
+
+        
         yield return new WaitForSeconds(shootingCooldown);
         canShoot = true;
         if (bulletsLeft <= 0) shooting = false;
@@ -170,6 +171,10 @@ public class GunSystem : MonoBehaviour
 
     void Shoot()
     {
+
+        //SFX (SHOOT):
+        AudioManager.Instance.Play("Shoot");
+
         Vector3 direction = fpsCam.transform.forward;
         float currentSpread = GetCurrentSpread();
         float spreadX = Random.Range(-currentSpread, currentSpread);
@@ -179,7 +184,7 @@ public class GunSystem : MonoBehaviour
         spreadDir += fpsCam.transform.right * Mathf.Tan(spreadX * Mathf.Deg2Rad);
         spreadDir += fpsCam.transform.up * Mathf.Tan(spreadY * Mathf.Deg2Rad);
         spreadDir.Normalize();
-
+        
         Debug.DrawRay(fpsCam.transform.position, spreadDir * range, Color.red, 1f);
 
         if (Physics.Raycast(fpsCam.transform.position, spreadDir, out hit, range, impactLayer))
@@ -191,7 +196,9 @@ public class GunSystem : MonoBehaviour
                 health.TakeDamage(appliedDamage);
             }
         }
+        
         ApplyRecoil();
+        
     }
     #endregion
 
@@ -225,16 +232,16 @@ public class GunSystem : MonoBehaviour
 
         Quaternion originalRot = weaponMesh.localRotation;
 
-        float duration = 0.4f; // duraciÛn total de la animaciÛn
+        float duration = 0.4f; // duraci√≥n total de la animaci√≥n
         float elapsed = 0f;
 
-        // AnimaciÛn tipo NO: de lado a lado en Z suavemente
+        // Animaci√≥n tipo NO: de lado a lado en Z suavemente
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
             float t = elapsed / duration;
 
-            // OscilaciÛn en Z: usa Sin para suavidad
+            // Oscilaci√≥n en Z: usa Sin para suavidad
             float zRotation = Mathf.Sin(t * Mathf.PI * 2f) * 5f; // 5 grados a cada lado
             weaponMesh.localRotation = originalRot * Quaternion.Euler(0f, 0f, zRotation);
 
@@ -249,38 +256,37 @@ public class GunSystem : MonoBehaviour
     #region Ammo Size
     void UpdateAmmoUI()
     {
-        if (ammoBar != null)
-        {
-            ammoBar.fillAmount = currentAmmoPercent / maxAmmoPercent;
-        }
+        if (ammoBar)
+            ammoBar.fillAmount = (float)bulletsLeft / ammoSize;
     }
 
-    public int PickUpAmmo(int amount)
+
+    public int PickUpAmmo(int units)
     {
-        if (bulletsLeft >= ammoSize)
-            return 0; // No hay espacio
+        int previousBullets = bulletsLeft;
 
-        int space = ammoSize - bulletsLeft;
-        int ammoToAdd = Mathf.Min(amount, space);
-        bulletsLeft += ammoToAdd;
+        bulletsLeft = Mathf.Min(bulletsLeft + units, ammoSize);
 
-        currentAmmoPercent = ((float)bulletsLeft / ammoSize) * maxAmmoPercent;
         UpdateAmmoUI();
 
-        return ammoToAdd; // Devuelve cu·ntas balas realmente se recogieron
+        return bulletsLeft - previousBullets; // devuelve lo que realmente entr√≥
     }
+
     #endregion
 
     #region Inputs
     void HandleShoot()
     {
-        shooting = true;
+        if (OxygenPickUp.IsConsumingOxygen) return; //bloqueamos disparo si esta consumiendo oxigeno.
 
-        // Si no hay balas, lanzar la animaciÛn de sacudida
+        // Si no hay balas, lanzar la animaci√≥n de sacudida
         if (bulletsLeft <= 0)
         {
+            shooting = false;
             StartCoroutine(EmptyShakeRoutine());
+            return;
         }
+        shooting = true;
     } 
     #endregion
 }

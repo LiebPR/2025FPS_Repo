@@ -24,9 +24,8 @@ public class Health : MonoBehaviour
     [SerializeField] Image healthBar;
 
     [Header("Ammo Drop Settings")]
-    [SerializeField] GameObject ammoPickupPrefab; // Prefab de munición
-    [SerializeField, Range(0f, 1f)] float ammoDropChance = 0.3f; // Probabilidad de soltar munición (0.3 = 30%)
-    [SerializeField] int ammoAmount = 10; // Cantidad de balas que da el pickup
+    [SerializeField] GameObject dropPrefab; // Prefab de munición
+    [SerializeField, Range(0f, 1f)] float percentChance = 0.3f; // Probabilidad de soltar munición (0.3 = 30%)
     #endregion
 
     #region Events
@@ -113,16 +112,9 @@ public class Health : MonoBehaviour
 
 
             // Probabilidad de soltar munición
-            if (ammoPickupPrefab != null && UnityEngine.Random.value <= ammoDropChance)
+            if (dropPrefab != null && UnityEngine.Random.value <= percentChance)
             {
-                GameObject pickup = Instantiate(ammoPickupPrefab, transform.position + Vector3.up * 1f, Quaternion.identity);
-
-                // Si tu prefab usa un script tipo GunSystem pickup, asigna la cantidad de munición
-                AmmoPickUp ammoPickup = pickup.GetComponent<AmmoPickUp>();
-                if (ammoPickup != null)
-                {
-                    ammoPickup.SetAmmoAmount(ammoAmount); // Método público que crearemos en el pickup
-                }
+                Instantiate(dropPrefab, transform.position, Quaternion.identity);
             }
         }
         else

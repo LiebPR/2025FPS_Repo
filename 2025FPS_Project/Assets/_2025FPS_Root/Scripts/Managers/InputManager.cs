@@ -12,13 +12,11 @@ public class InputManager : MonoBehaviour
     //Para FPSController
     public static event Action<Vector2> OnMoveEvent;
     public static event Action<Vector2> OnLookEvent;
-    public static event Action OnJumpEvent;
     public static event Action<bool> OnCrouchEvent;
     public static event Action<bool> OnSprintEvent;
 
     //Para GunSystem
     public static event Action OnShootEvent;
-    public static event Action OnReloadEvent;
 
     //Para InteractionSystem
     public static event Action OnInteractHoldStart;
@@ -42,9 +40,6 @@ public class InputManager : MonoBehaviour
         inputActions.Gameplay.Look.performed += ctx => OnLookEvent?.Invoke(ctx.ReadValue<Vector2>());
         inputActions.Gameplay.Look.canceled += ctx => OnLookEvent?.Invoke(Vector2.zero);
 
-        //Saltar
-        inputActions.Gameplay.Jump.performed += ctx => OnJumpEvent?.Invoke();
-
         //Agacharse
         inputActions.Gameplay.Crouch.performed += ctx => OnCrouchEvent?.Invoke(true);
         inputActions.Gameplay.Crouch.canceled += ctx => OnCrouchEvent?.Invoke(false);
@@ -55,9 +50,6 @@ public class InputManager : MonoBehaviour
 
         //Disparar
         inputActions.Gameplay.Shoot.performed += ctx => OnShootEvent?.Invoke();
-
-        //Recargar
-        inputActions.Gameplay.Reload.performed += ctx => OnReloadEvent?.Invoke();
 
         //Interacción
         inputActions.Gameplay.Interact.performed += ctx => OnInteractHoldStart?.Invoke();
@@ -91,9 +83,6 @@ public class InputManager : MonoBehaviour
         inputActions.Gameplay.Look.performed -= ctx => OnLookEvent?.Invoke(ctx.ReadValue<Vector2>());
         inputActions.Gameplay.Look.canceled -= ctx => OnLookEvent?.Invoke(Vector2.zero);
 
-        //Saltar
-        inputActions.Gameplay.Jump.performed -= ctx => OnJumpEvent?.Invoke();
-
         //Agacharse
         inputActions.Gameplay.Crouch.performed -= ctx => OnCrouchEvent?.Invoke(true);
         inputActions.Gameplay.Crouch.canceled -= ctx => OnCrouchEvent?.Invoke(false);
@@ -104,9 +93,6 @@ public class InputManager : MonoBehaviour
 
         //Disparar
         inputActions.Gameplay.Shoot.performed -= ctx => OnShootEvent?.Invoke();
-
-        //Recargar
-        inputActions.Gameplay.Reload.performed -= ctx => OnReloadEvent?.Invoke();
 
         //Interacción
         inputActions.Gameplay.Interact.performed -= ctx => OnInteractHoldStart?.Invoke();

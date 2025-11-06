@@ -29,6 +29,12 @@ public class FPSController : MonoBehaviour
     [SerializeField] float sprintFOV = 75f;
     [SerializeField] float fovChangeSpeed = 8f;
 
+    [Header("Oxygen Zoom Settings")]
+    [SerializeField] float zoomInFov = 55f; //FOV cuando consume oxígeno
+    [SerializeField] float zoomOutFov = 70f; //FOV normal del juego
+    [SerializeField] float zoomInSpeed = 1f; //velocidad de zoom in
+    [SerializeField] float zoomOutSpeed = 10f; //velocidad de zoom out
+
     [Header("Head Bob Settings")]
     [SerializeField] float walkBobSpeed = 10f;
     [SerializeField] float walkBobAmount = 0.05f;
@@ -130,12 +136,23 @@ public class FPSController : MonoBehaviour
 
     private void LateUpdate()
     {
+
+        //BLOQUEO DE MOVIMIENTO Y CAMARA CUANDO ESTA CONSUMIENDO OXIGENO
+        if (OxygenPickUp.IsConsumingOxygen)
+        {
+            playerRb.linearVelocity = Vector3.Lerp(playerRb.linearVelocity, Vector3.zero, Time.deltaTime * 6f);
+
+            HandleZoom();
+            return;
+        }
         HandleHeadBob();
         CameraLook();
     }
 
     void Movement()
     {
+        if (OxygenPickUp.IsConsumingOxygen) return;
+
         Vector3 currentVelocity = playerRb.linearVelocity;
         Vector3 targetVelocity = new Vector3(moveInput.x, 0, moveInput.y);
         targetVelocity *= isCrouching ? crouchSpeed : (isSprinting ? sprintSpeed : speed);
@@ -231,6 +248,21 @@ public class FPSController : MonoBehaviour
     }
     #endregion
 
+    #region Zoom In & Out
+    void HandleZoom()
+    {
+        if (OxygenPickUp.IsConsumingOxygen)
+        {
+            //Zoom In lento
+            playerCamera.fieldOfView = Mathf.Lerp(playerCamera.fieldOfView, zoomInFov, Time.deltaTime * zoomInSpeed);
+        }
+        else
+        {
+            playerCamera.fieldOfView = Mathf.Lerp(playerCamera.fieldOfView, zoomOutFov, Time.deltaTime * zoomOutSpeed);
+        }
+    }
+    #endregion
+
     #region Auxiliar
     public bool HasMovementInput()
     {
@@ -241,6 +273,7 @@ public class FPSController : MonoBehaviour
     #region Input Handlers
     public void HandleMove(Vector2 input)
     {
+        if(OxygenPickUp.IsConsumingOxygen) return; //bloqueamos el Input de movimiento si esta consumiendo Oxigeno
         moveInput = input;
     }
 
@@ -269,9 +302,5 @@ public class FPSController : MonoBehaviour
         // Evitar sprint si estás agachado
         if (isCrouching) isSprinting = false;
     }
-    #endregion
-
-    #region Cámara
-
     #endregion
 }

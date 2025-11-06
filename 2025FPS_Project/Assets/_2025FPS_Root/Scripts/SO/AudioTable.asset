@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 470b84747c18e004c8ce8919be961f52, type: 3}
+  m_Name: AudioTable
+  m_EditorClassIdentifier: 
+  audios:
+  - id: Shoot
+    clip: {fileID: 8300000, guid: 96b8c763ffc2bf44a8750e6756f1c342, type: 3}
+    group: 2
+    defaultVolume: 0.3
+  - id: AmmoPickUpTrue
+    clip: {fileID: 8300000, guid: 24d4c925cb767c4498ff885f64b31bc8, type: 3}
+    group: 2
+    defaultVolume: 0.5
+  - id: AmmoPickUp
+    clip: {fileID: 8300000, guid: 1368ea0669722fe4d8ffd2a92140f005, type: 3}
+    group: 2
+    defaultVolume: 0.5
+  - id: AmmoPickUpFalse
+    clip: {fileID: 8300000, guid: 6e186c1095ca67f44bbdf49d2e0be9dc, type: 3}
+    group: 2
+    defaultVolume: 0.5
+  - id: Alarma
+    clip: {fileID: 8300000, guid: 77035cb9684a9364fb7506b22d79b6ff, type: 3}
+    group: 2
+    defaultVolume: 0.8

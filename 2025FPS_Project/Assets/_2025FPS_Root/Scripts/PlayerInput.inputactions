@@ -24,15 +24,6 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Jump",
-                    "type": "Button",
-                    "id": "ee44b264-24ee-4ddc-a715-0e02dedd0d0d",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "Shoot",
                     "type": "Button",
                     "id": "20c14a4a-fdaf-420c-b889-d101100e243c",
@@ -54,15 +45,6 @@
                     "name": "Sprint",
                     "type": "Button",
                     "id": "f300d50e-511e-4f6c-8d16-afefb9190e06",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Reload",
-                    "type": "Button",
-                    "id": "94131c1a-692d-4578-8fdc-caed91deaa44",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -169,28 +151,6 @@
                 },
                 {
                     "name": "",
-                    "id": "3bc412bf-50f3-409e-a9bd-bf9ef76162a5",
-                    "path": "<Gamepad>/buttonSouth",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Jump",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "3a20294c-2eeb-485b-bb02-489e381ea10f",
-                    "path": "<Keyboard>/space",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Jump",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "97164dd0-c873-4a3a-9fce-f3f149095a59",
                     "path": "<Gamepad>/rightTrigger",
                     "interactions": "",
@@ -252,28 +212,6 @@
                     "processors": "",
                     "groups": "",
                     "action": "Sprint",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "9e20d06a-cd52-43d0-9061-872edf73b7cb",
-                    "path": "<Gamepad>/buttonWest",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Reload",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "a7348bac-7202-47d8-93b5-de71c8a70087",
-                    "path": "<Keyboard>/r",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Reload",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

@@ -26,6 +26,10 @@ public class CountdownTimer : MonoBehaviour
     bool isOxygenBeingConsumed; // Nueva variable que indica si el oxígeno está siendo consumido
     #endregion
 
+    #region Getter
+    public bool IsFull => currentTime >= totalTime - 0.0001f;
+    #endregion
+
     void Start()
     {
         if (!timerText || !progressBar)
@@ -46,7 +50,7 @@ public class CountdownTimer : MonoBehaviour
 
     void Update()
     {
-        if (!isRunning || isGameOverTriggered || isOxygenBeingConsumed) return; // No avanza si el oxígeno está siendo consumido
+        if (!isRunning || isGameOverTriggered) return; // No avanza si el oxígeno está siendo consumido
 
         currentTime -= Time.deltaTime;
 
@@ -107,12 +111,12 @@ public class CountdownTimer : MonoBehaviour
     }
 
     //Añade tiempo extra al temporizador
-    public void AddTime(float seconds)
+    public bool AddTime(float seconds)
     {
-        if (isGameOverTriggered) return;
-
+        if (isGameOverTriggered) return false;
         currentTime = Mathf.Min(currentTime + seconds, totalTime);
         UpdateTimerDisplay();
+        return IsFull;
     }
 
     // Controla el consumo de oxígeno y detiene el temporizador
@@ -132,11 +136,28 @@ public class CountdownTimer : MonoBehaviour
     {
         float normalized = Mathf.Clamp01(currentTime / totalTime);
         float percentage = normalized * 100f;
+
+        // NUEVO: Parpadeo solo si está debajo del 10%
+        if (percentage <= 10f)
+        {
+            if (!isFlashing)
+                isFlashing = true;
+        }
+        else
+        {
+            if (isFlashing)
+            {
+                isFlashing = false;
+                timerText.color = originalColor;
+            }
+        }
+
         timerText.text = $"{percentage:0}%";
 
         if (progressBar)
             progressBar.fillAmount = normalized;
     }
+
 
     void FlashText()
     {
