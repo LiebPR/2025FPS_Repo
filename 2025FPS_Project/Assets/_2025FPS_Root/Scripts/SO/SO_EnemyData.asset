@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 444a0354e1cb94c45b644d239ae73916, type: 3}
   m_Name: SO_EnemyData
   m_EditorClassIdentifier: 
-  debugLogs: 0
+  debugLogs: 1
   visionRadius: 5
   visionAngle: 80
   perceptionRadius: 2
@@ -24,25 +24,25 @@ MonoBehaviour:
   maxStopDistance: 3.5
   stopTransitionTime: 0.5
   perceptionDelay: 0.5
-  lostDelay: 0.5
+  lostDelay: 1
   closeHearingRange: 5
   mediumHearingRange: 10
-  longHearingRange: 20
+  longHearingRange: 50
   lostHearingDelay: 1
   groundLayer:
     serializedVersion: 2
     m_Bits: 8
   patrolSpeed: 2
   walkPointRange: 10
-  chaseSpeed: 6
+  chaseSpeed: 5
   idleTime: 1
   stuckCheckTime: 2
   stuckThreshold: 0.1
   maxStuckDuration: 3
   impactLayer:
     serializedVersion: 2
-    m_Bits: 392
-  damage: 10
+    m_Bits: 1416
+  damage: 5
   range: 6
-  shootingCooldown: 1
+  shootingCooldown: 2
   attackRange: 9

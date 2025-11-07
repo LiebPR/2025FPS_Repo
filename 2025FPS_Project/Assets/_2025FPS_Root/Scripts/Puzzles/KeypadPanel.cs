@@ -13,7 +13,7 @@ public class KeypadPanel : MonoBehaviour
     [SerializeField] TMP_Text displayMesh; //texto que muestra los dígitos
     [SerializeField] GameObject tickCorrect; //tick verde
     [SerializeField] GameObject tickWrong; //X roja
-    [SerializeField] DoorSystem linkedDoor; //referencia a la puerta
+    [SerializeField] InjectionDoorController linkedDoor; //referencia a la puerta
 
     string currentInput = "";
 

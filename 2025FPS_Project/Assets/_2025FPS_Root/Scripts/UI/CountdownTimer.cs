@@ -1,34 +1,39 @@
+Ôªøusing TMPro;
 using UnityEngine;
-using TMPro;
-using UnityEngine.Events;
+using UnityEngine.UI;
 
 /// <summary>
-/// Temporizador regresivo que muestra MM:SS en un TextMeshProUGUI.
-/// Definir minutos en startMinutes (ej: 10 para 10:00).
+/// CountdownTimer: Temporizador con barra de progreso y porcentaje.
+/// Al llegar a 0, muestra Game Over y notifica al GameManager.
 /// </summary>
 public class CountdownTimer : MonoBehaviour
 {
     #region General Variables
-    [SerializeField] TextMeshProUGUI timerText; //referencia al TMPRO de la UI
-    [SerializeField] int startMinutes = 10; //minutos iniciales (ej: 10 -> 10:00)
-    bool startOnAwake = true; //arrancar al Start autom·ticamente
-    UnityEvent onTimerEnd; //evento opcional al llegar a 00:00
+    [SerializeField] TextMeshProUGUI timerText;     // Referencia al TMPRO de la UI
+    [SerializeField] Image progressBar;             // Imagen UI con Fill Amount
+    [SerializeField] int startMinutes = 10;         // Minutos iniciales (ej: 10 -> 10:00)
+    [SerializeField] bool startOnAwake = true;      // Arranca autom√°ticamente al iniciar
     #endregion
 
     #region Variables internas
-    float currentTime; // Tiempo actual en segundos
-    float totalTime; //tiempo total en segundos
-    bool isRunning; // Control de ejecuciÛn
-    Color originalColor;
+    float currentTime;
+    float totalTime;
+    bool isRunning;
     bool isFlashing;
+    bool isGameOverTriggered;
+    Color originalColor;
     float flashSpeed = 2f;
+    bool isOxygenBeingConsumed; // Nueva variable que indica si el ox√≠geno est√° siendo consumido
+    #endregion
+
+    #region Getter
+    public bool IsFull => currentTime >= totalTime - 0.0001f;
     #endregion
 
     void Start()
     {
-        if (timerText == null)
+        if (!timerText || !progressBar)
         {
-            Debug.LogError("CountdownTimer: No se ha asignado el TextMeshProUGUI.");
             enabled = false;
             return;
         }
@@ -45,35 +50,48 @@ public class CountdownTimer : MonoBehaviour
 
     void Update()
     {
-        if (!isRunning) return;
+        if (!isRunning || isGameOverTriggered) return; // No avanza si el ox√≠geno est√° siendo consumido
 
         currentTime -= Time.deltaTime;
 
-        // Activar parpadeo cuando queden 10 segundos o menos
         if (currentTime <= 10f && !isFlashing)
             isFlashing = true;
 
         if (isFlashing)
             FlashText();
 
-        // Verificar si terminÛ
         if (currentTime <= 0f)
         {
-            currentTime = 0f;
-            isRunning = false;
-            isFlashing = false;
-            timerText.color = Color.red;
-            UpdateTimerDisplay();
-            onTimerEnd?.Invoke();
+            TriggerGameOver();
+            return;
         }
 
         UpdateTimerDisplay();
     }
 
-    #region API p˙blica
+    #region GameOver Logic
+    void TriggerGameOver()
+    {
+        currentTime = 0f;
+        isRunning = false;
+        isFlashing = false;
+        isGameOverTriggered = true;
+        timerText.color = Color.red;
+
+        UpdateTimerDisplay();
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.GameOver();
+        }
+    }
+    #endregion
+
+    #region Public API
     public void StartTimer()
     {
         isRunning = true;
+        isGameOverTriggered = false;
         UpdateTimerDisplay();
     }
 
@@ -87,21 +105,62 @@ public class CountdownTimer : MonoBehaviour
         currentTime = Mathf.Max(0, startMinutes * 60);
         isRunning = startOnAwake;
         isFlashing = false;
+        isGameOverTriggered = false;
         timerText.color = originalColor;
         UpdateTimerDisplay();
+    }
+
+    //A√±ade tiempo extra al temporizador
+    public bool AddTime(float seconds)
+    {
+        if (isGameOverTriggered) return false;
+        currentTime = Mathf.Min(currentTime + seconds, totalTime);
+        UpdateTimerDisplay();
+        return IsFull;
+    }
+
+    // Controla el consumo de ox√≠geno y detiene el temporizador
+    public void StartOxygenConsumption()
+    {
+        isOxygenBeingConsumed = true;
+    }
+
+    public void StopOxygenConsumption()
+    {
+        isOxygenBeingConsumed = false;
     }
     #endregion
 
     #region Utilidades
     void UpdateTimerDisplay()
     {
-        float percentage = Mathf.Clamp01(currentTime / totalTime) * 100f;
+        float normalized = Mathf.Clamp01(currentTime / totalTime);
+        float percentage = normalized * 100f;
+
+        // NUEVO: Parpadeo solo si est√° debajo del 10%
+        if (percentage <= 10f)
+        {
+            if (!isFlashing)
+                isFlashing = true;
+        }
+        else
+        {
+            if (isFlashing)
+            {
+                isFlashing = false;
+                timerText.color = originalColor;
+            }
+        }
+
         timerText.text = $"{percentage:0}%";
+
+        if (progressBar)
+            progressBar.fillAmount = normalized;
     }
+
 
     void FlashText()
     {
-        // Oscila entre el color original y rojo seg˙n el tiempo
         float t = Mathf.PingPong(Time.time * flashSpeed, 1f);
         timerText.color = Color.Lerp(originalColor, Color.red, t);
     }

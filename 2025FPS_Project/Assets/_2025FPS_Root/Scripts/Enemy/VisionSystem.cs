@@ -75,26 +75,29 @@ public class VisionSystem : MonoBehaviour
     {
         bool previusSee = canSeeTarget;
 
-        //Detección Frontal
-        if(inCone && !obstacle)
+        // 1) Detección frontal (cono) — prioridad alta
+        if (inCone && !obstacle)
         {
+            // Si ve, resetea lostTimer y marca visión
             lostTimer = enemyData.lostDelay;
             canSeeTarget = true;
             LastKnownPosition = Target.position;
         }
         else
         {
+            // Si no ve frontalmente, decrementar timer de pérdida
             lostTimer -= Time.deltaTime;
-            if(lostTimer <= 0f)
+            if (lostTimer <= 0f)
             {
                 canSeeTarget = false;
                 lostTimer = 0f;
             }
         }
 
-        //Percepción Cercana
-        if(inPerceptionArea && !canSeeTarget)
+        // 2) Percepción cercana — solo si no se ve en el cono
+        if (!canSeeTarget && inPerceptionArea)
         {
+            // si acabamos de entrar en área de percepción, inicializamos el temporizador
             if (!isPlayerInPerceptionArea)
             {
                 isPlayerInPerceptionArea = true;
@@ -102,24 +105,26 @@ public class VisionSystem : MonoBehaviour
             }
 
             perceptionTimer -= Time.deltaTime;
-            if(perceptionTimer <= 0f)
+            if (perceptionTimer <= 0f)
             {
                 canSeeTarget = true;
-                perceptionTimer = enemyData.perceptionDelay;
+                LastKnownPosition = Target.position;
+                perceptionTimer = enemyData.perceptionDelay; // reset para la próxima vez
             }
         }
         else
         {
+            // fuera del área de percepción -> reset estado de percepción
             isPlayerInPerceptionArea = false;
             perceptionTimer = enemyData.perceptionDelay;
         }
 
-        //Eventos
-        if(canSeeTarget && !previusSee)
+        // 3) Eventos — solo cuando hay cambio real
+        if (canSeeTarget && !previusSee)
         {
             OnTargetSee?.Invoke(Target);
         }
-        else if(!canSeeTarget && previusSee && lostTimer <= 0f)
+        else if (!canSeeTarget && previusSee && lostTimer <= 0f)
         {
             OnTargetLose?.Invoke(Target);
         }
@@ -162,37 +167,18 @@ public class VisionSystem : MonoBehaviour
     {
         if(Target == null) return false;
 
-        Vector3 enemyCenter = visionPoint.position; //centro del enemigo
         float perceptionRadius = enemyData.perceptionRadius;
+        float distance = Vector3.Distance(visionPoint.position, Target.position);
+        if(distance > perceptionRadius) return false;
 
-        Collider[] hits = Physics.OverlapSphere(enemyCenter, perceptionRadius, LayerMask.GetMask("Player"));//devuelve el primer collider del jugador
-        Collider hit = hits.Length > 0 ? hits[0] : null; 
-        if (hit != null && hit.transform == Target)
-        {
-            //Verificamos que no haya obstáculos usando el raycast 3D existente
-            Vector3 dirToTarget = (Target.position - visionPoint.position).normalized;
-            float distanceToTarget = Vector3.Distance(visionPoint.position, Target.position);
+        Vector3 dirToTarget = (Target.position - visionPoint.position).normalized;
+        float distToTarget = distance;
 
-            if(!CheckObstacle(dirToTarget, distanceToTarget, out _))
-            {
-                //Se respeta la lógica de tiempo para "darse cuenta"
-                if (!canSeeTarget)
-                {
-                    perceptionTimer -= Time.deltaTime;
-                    return true;
-                }
-            }
-            else
-            {
-                //Si ya lo ve, reiniciamos el temporizador
-                perceptionTimer = enemyData.perceptionDelay;
-                return true; 
-            }
-        }
+        //Si hay obstáculo, consideramos que no está en percepción efectivo
+        if (CheckObstacle(dirToTarget, distToTarget, out _)) return false;
 
-        //Si hay detección válida, reiniciamos el temporizador
-        perceptionTimer = enemyData.perceptionDelay;
-        return false;
+        return true;
+
     }
     void CheckStopArea()
     {

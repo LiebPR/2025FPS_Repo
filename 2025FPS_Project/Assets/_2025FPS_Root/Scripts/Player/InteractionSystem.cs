@@ -42,6 +42,15 @@ public class InteractionSystem : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit, interactRange, interactMask, QueryTriggerInteraction.Collide))
         {
             currentTarget = hit.collider.GetComponent<IInteractable>() ?? hit.collider.GetComponentInParent<IInteractable>();
+
+            // Si es un AmmoPickUp, asignarle GunSystem
+            AmmoPickUp ammoPick = currentTarget as AmmoPickUp;
+            if (ammoPick != null)
+            {
+                GunSystem playerGun = GetComponent<GunSystem>();
+                ammoPick.SetPlayerGun(playerGun);
+            }
+
             currentTarget?.OnPress();
         }
 

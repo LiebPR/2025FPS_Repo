@@ -54,22 +54,29 @@ public class ListenSystem : MonoBehaviour
             return;
         }
 
-        //Distancia obtenida desde la última posición conocida del VisionSystem
-        distanceToPlayer = Vector3.Distance(transform.position, vision.LastKnownPosition);
+        if(fpsController != null)
+        {
+            distanceToPlayer = Vector3.Distance(transform.position, fpsController.transform.position);
+        }
+        else
+            distanceToPlayer = float.MaxValue;
 
         bool previousListen = iListen;
         iListen = false;
 
         //Condiciones de escuchar por rango
-        if(gunSystem.IsShooting && distanceToPlayer <= enemyData.longHearingRange)
+        //Disparos:
+        if (gunSystem.IsShooting && distanceToPlayer <= enemyData.longHearingRange)
         {
             iListen = true;
         }
-        else if(distanceToPlayer <= enemyData.mediumHearingRange && fpsController.IsSprinting)
+        //Sprint:
+        else if (fpsController.IsSprinting && distanceToPlayer <= enemyData.mediumHearingRange)
         {
             iListen = true;
         }
-        else if (distanceToPlayer <= enemyData.closeHearingRange && fpsController.HasMovementInput() && fpsController.IsCrouching)
+        //Caminar: 
+        else if (fpsController.HasMovementInput() && !fpsController.IsSprinting && !fpsController.IsCrouching && distanceToPlayer <= enemyData.closeHearingRange)
         {
             iListen = true;
         }

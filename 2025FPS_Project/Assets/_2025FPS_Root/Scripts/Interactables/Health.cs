@@ -22,6 +22,10 @@ public class Health : MonoBehaviour
 
     [Header("Player UI")]
     [SerializeField] Image healthBar;
+
+    [Header("Ammo Drop Settings")]
+    [SerializeField] GameObject dropPrefab; // Prefab de munición
+    [SerializeField, Range(0f, 1f)] float percentChance = 0.3f; // Probabilidad de soltar munición (0.3 = 30%)
     #endregion
 
     #region Events
@@ -105,10 +109,21 @@ public class Health : MonoBehaviour
         {
             OnDeath?.Invoke(); //invoca el evento antes de apagaer el objeto
             gameObject.SetActive(false); //desactivar el enemigo (vuelve a la pool)
+
+
+            // Probabilidad de soltar munición
+            if (dropPrefab != null && UnityEngine.Random.value <= percentChance)
+            {
+                Instantiate(dropPrefab, transform.position, Quaternion.identity);
+            }
         }
         else
         {
-            //LOSESCENE
+            //Jugador muere
+            if(GameManager.Instance != null)
+            {
+                GameManager.Instance.GameOver();
+            }
         }
 
         

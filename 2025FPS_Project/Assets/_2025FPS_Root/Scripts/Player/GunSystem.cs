@@ -1,6 +1,7 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class GunSystem : MonoBehaviour
 {
@@ -11,6 +12,12 @@ public class GunSystem : MonoBehaviour
     [SerializeField] LayerMask impactLayer;
     RaycastHit hit;
 
+    [Header("Ammo UI")]
+    [SerializeField] Image ammoBar; //image tipo fill
+    [SerializeField] int maxAmmoPercent = 100; //max percentaje
+    float currentAmmoPercent; //porcentaje actual
+    float percentPerBullet; 
+
     [Header("Weapon Parameters")]
     [SerializeField] int damage = 10;
     [SerializeField] float range = 100f;
@@ -19,7 +26,6 @@ public class GunSystem : MonoBehaviour
     [SerializeField] float sprintSpreadMultiplier = 2f;
     [SerializeField] float jumpSpreadMultiplier = 2.5f;
     [SerializeField] float shootingCooldown = 0.2f;
-    [SerializeField] float reloadTime = 1.5f;
     [SerializeField] bool allowButtonHold = false;
 
     [Header("Recoil Settings")]
@@ -49,20 +55,29 @@ public class GunSystem : MonoBehaviour
     Vector3 weaponTargetEuler;
     Vector3 weaponCurrentEuler;
 
+    [Header("Crosshair")]
+    [SerializeField] RectTransform crosshair;
+    [SerializeField] float crosshairScaleAmount = 1.2f;
+    [SerializeField] float crosshairRotateAmount = 10f;
+    [SerializeField] float crosshairReturnSpeed = 8f;
+
     Vector3 lastHitPoint;
+    Vector3 crosshairOriginalScale;
+    Quaternion crosshairOriginalRotation;
 
     bool shooting;
     bool canShoot;
     bool reloading;
-    bool weaponReloadingAnimation;
     bool emptyShakeDone;
 
     Coroutine recoilCoroutine;
     #endregion
 
     #region Getters
-    public bool IsShooting => shooting;
-    public Vector3 LastHitPoint => lastHitPoint;
+    public bool IsShooting => shooting; //Informa: Puedo disparar
+    public Vector3 LastHitPoint => lastHitPoint; //Ultimo punto de golpeo
+    public int BulletsLeft => bulletsLeft; //munici√≥n restante
+    public int AmmoSize => ammoSize; //capacidad de balas
     #endregion
 
     #region References
@@ -73,6 +88,7 @@ public class GunSystem : MonoBehaviour
     {
         playerController = GetComponent<FPSController>();
         bulletsLeft = ammoSize;
+        currentAmmoPercent = maxAmmoPercent;
         canShoot = true;
     }
 
@@ -80,13 +96,11 @@ public class GunSystem : MonoBehaviour
     private void OnEnable()
     {
         InputManager.OnShootEvent += HandleShoot;
-        InputManager.OnReloadEvent += HandleReload;
     }
 
     private void OnDisable()
     {
         InputManager.OnShootEvent -= HandleShoot;
-        InputManager.OnReloadEvent -= HandleReload;
     }
     #endregion
 
@@ -99,6 +113,15 @@ public class GunSystem : MonoBehaviour
             weaponCurrentEuler = weaponOriginalEuler;
         }
         camOriginalRotation = fpsCam.transform.localEulerAngles;
+
+        if(crosshair != null)
+        {
+            crosshairOriginalScale = crosshair.localScale;
+            crosshairOriginalRotation = crosshair.localRotation;
+        }
+        //Porcentaje de munici√≥n
+        percentPerBullet = (float)maxAmmoPercent / ammoSize;
+        UpdateAmmoUI();
     }
 
     void Update()
@@ -126,14 +149,21 @@ public class GunSystem : MonoBehaviour
             weaponTargetRecoil = Vector3.Lerp(weaponTargetRecoil, Vector3.zero, Time.deltaTime * weaponRecoilSpeed);
         }
 
-        // DAMPING ARMA (solo si no est· recargando)
-        if (weaponMesh != null && !weaponReloadingAnimation)
+        // DAMPING ARMA (solo si no est√° recargando)
+        if (weaponMesh != null)
         {
             Vector2 mouseDelta = Mouse.current.delta.ReadValue();
             weaponTargetEuler.y = weaponOriginalEuler.y + mouseDelta.x * 0.1f;
             weaponTargetEuler.x = weaponOriginalEuler.x - mouseDelta.y * 0.1f;
             weaponCurrentEuler = Vector3.Lerp(weaponCurrentEuler, weaponTargetEuler, Time.deltaTime * weaponDamping);
             weaponMesh.localEulerAngles = weaponCurrentEuler;
+        }
+
+        //Return Crosshair
+        if (crosshair != null)
+        {
+            crosshair.localScale = Vector3.Lerp(crosshair.localScale, crosshairOriginalScale, Time.deltaTime * crosshairReturnSpeed);
+            crosshair.localRotation = Quaternion.Lerp(crosshair.localRotation, crosshairOriginalRotation, Time.deltaTime * crosshairReturnSpeed);
         }
     }
 
@@ -147,7 +177,12 @@ public class GunSystem : MonoBehaviour
             if (bulletsLeft <= 0) break;
             Shoot();
             bulletsLeft--;
+            currentAmmoPercent -= percentPerBullet;
+            if (currentAmmoPercent < 0) currentAmmoPercent = 0;
+            UpdateAmmoUI();
         }
+
+        
         yield return new WaitForSeconds(shootingCooldown);
         canShoot = true;
         if (bulletsLeft <= 0) shooting = false;
@@ -156,6 +191,10 @@ public class GunSystem : MonoBehaviour
 
     void Shoot()
     {
+
+        //SFX (SHOOT):
+        AudioManager.Instance.Play("Shoot");
+
         Vector3 direction = fpsCam.transform.forward;
         float currentSpread = GetCurrentSpread();
         float spreadX = Random.Range(-currentSpread, currentSpread);
@@ -165,7 +204,7 @@ public class GunSystem : MonoBehaviour
         spreadDir += fpsCam.transform.right * Mathf.Tan(spreadX * Mathf.Deg2Rad);
         spreadDir += fpsCam.transform.up * Mathf.Tan(spreadY * Mathf.Deg2Rad);
         spreadDir.Normalize();
-
+        
         Debug.DrawRay(fpsCam.transform.position, spreadDir * range, Color.red, 1f);
 
         if (Physics.Raycast(fpsCam.transform.position, spreadDir, out hit, range, impactLayer))
@@ -177,7 +216,9 @@ public class GunSystem : MonoBehaviour
                 health.TakeDamage(appliedDamage);
             }
         }
+        
         ApplyRecoil();
+        AnimationCrosshair();
     }
     #endregion
 
@@ -204,87 +245,23 @@ public class GunSystem : MonoBehaviour
     }
     #endregion
 
-    #region Reload
-    void Reload()
-    {
-        if (bulletsLeft < ammoSize && !reloading)
-        {
-            shooting = false;
-            canShoot = false;
-            StartCoroutine(ReloadRoutine());
-        }
-        if (recoilCoroutine != null)
-        {
-            StopCoroutine(recoilCoroutine);
-            recoilCoroutine = null;
-        }
-    }
-
-    IEnumerator ReloadRoutine()
-    {
-        reloading = true;
-        canShoot = false;
-        weaponReloadingAnimation = true;
-
-        if (weaponMesh != null)
-        {
-            Quaternion originalRot = weaponMesh.localRotation;
-            Quaternion targetRot = originalRot * Quaternion.Euler(5f, 10f, 20f);
-            float timer = 0f;
-
-            // AnimaciÛn ida
-            while (timer < reloadTime * 0.5f)
-            {
-                timer += Time.deltaTime;
-                float t = timer / (reloadTime * 0.5f);
-                weaponMesh.localRotation = Quaternion.Slerp(originalRot, targetRot, t);
-                yield return null;
-            }
-
-            // AnimaciÛn vuelta
-            timer = 0f;
-            while (timer < reloadTime * 0.5f)
-            {
-                timer += Time.deltaTime;
-                float t = timer / (reloadTime * 0.5f);
-                weaponMesh.localRotation = Quaternion.Slerp(targetRot, originalRot, t);
-                yield return null;
-            }
-
-            weaponMesh.localRotation = originalRot;
-        }
-        else
-        {
-            yield return new WaitForSeconds(reloadTime);
-        }
-
-        bulletsLeft = ammoSize;
-        reloading = false;
-        weaponReloadingAnimation = false;
-        shooting = false;
-        canShoot = true;
-        emptyShakeDone = false;
-    }
-    #endregion
-
     #region Shake
     IEnumerator EmptyShakeRoutine()
     {
         if (weaponMesh == null) yield break;
 
-        weaponReloadingAnimation = true; // bloquea damping mientras ocurre la animaciÛn
         Quaternion originalRot = weaponMesh.localRotation;
 
-        float duration = 0.4f; // duraciÛn total de la animaciÛn
+        float duration = 0.4f; // duraci√≥n total de la animaci√≥n
         float elapsed = 0f;
 
-        // AnimaciÛn tipo NO: de lado a lado en Z suavemente
+        // Animaci√≥n tipo NO: de lado a lado en Z suavemente
         while (elapsed < duration)
         {
             elapsed += Time.deltaTime;
             float t = elapsed / duration;
 
-            // OscilaciÛn en Z: usa Sin para suavidad
+            // Oscilaci√≥n en Z: usa Sin para suavidad
             float zRotation = Mathf.Sin(t * Mathf.PI * 2f) * 5f; // 5 grados a cada lado
             weaponMesh.localRotation = originalRot * Quaternion.Euler(0f, 0f, zRotation);
 
@@ -293,21 +270,54 @@ public class GunSystem : MonoBehaviour
 
         // Reset exacto
         weaponMesh.localRotation = originalRot;
-        weaponReloadingAnimation = false;
+    }
+    #endregion
+
+    #region Ammo Size
+    void UpdateAmmoUI()
+    {
+        if (ammoBar)
+            ammoBar.fillAmount = (float)bulletsLeft / ammoSize;
+    }
+
+
+    public int PickUpAmmo(int units)
+    {
+        int previousBullets = bulletsLeft;
+
+        bulletsLeft = Mathf.Min(bulletsLeft + units, ammoSize);
+
+        UpdateAmmoUI();
+
+        return bulletsLeft - previousBullets; // devuelve lo que realmente entr√≥
+    }
+
+    #endregion
+
+    #region Animation Crosshair
+    void AnimationCrosshair()
+    {
+        if (crosshair == null) return;
+
+        crosshair.localScale = crosshairOriginalScale * crosshairScaleAmount;
+
+        crosshair.localRotation = Quaternion.Euler(crosshairOriginalRotation.eulerAngles.x, crosshairOriginalRotation.eulerAngles.y, crosshairOriginalRotation.eulerAngles.z + crosshairRotateAmount);
     }
     #endregion
 
     #region Inputs
     void HandleShoot()
     {
-        shooting = true;
+        if (OxygenPickUp.IsConsumingOxygen) return; //bloqueamos disparo si esta consumiendo oxigeno.
 
-        // Si no hay balas, lanzar la animaciÛn de sacudida
-        if (bulletsLeft <= 0 && !weaponReloadingAnimation)
+        // Si no hay balas, lanzar la animaci√≥n de sacudida
+        if (bulletsLeft <= 0)
         {
+            shooting = false;
             StartCoroutine(EmptyShakeRoutine());
+            return;
         }
+        shooting = true;
     } 
-    void HandleReload() => Reload();
     #endregion
 }
