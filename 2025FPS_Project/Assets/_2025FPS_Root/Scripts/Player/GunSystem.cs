@@ -55,7 +55,15 @@ public class GunSystem : MonoBehaviour
     Vector3 weaponTargetEuler;
     Vector3 weaponCurrentEuler;
 
+    [Header("Crosshair")]
+    [SerializeField] RectTransform crosshair;
+    [SerializeField] float crosshairScaleAmount = 1.2f;
+    [SerializeField] float crosshairRotateAmount = 10f;
+    [SerializeField] float crosshairReturnSpeed = 8f;
+
     Vector3 lastHitPoint;
+    Vector3 crosshairOriginalScale;
+    Quaternion crosshairOriginalRotation;
 
     bool shooting;
     bool canShoot;
@@ -66,10 +74,10 @@ public class GunSystem : MonoBehaviour
     #endregion
 
     #region Getters
-    public bool IsShooting => shooting;
-    public Vector3 LastHitPoint => lastHitPoint;
-    public int BulletsLeft => bulletsLeft;
-    public int AmmoSize => ammoSize;
+    public bool IsShooting => shooting; //Informa: Puedo disparar
+    public Vector3 LastHitPoint => lastHitPoint; //Ultimo punto de golpeo
+    public int BulletsLeft => bulletsLeft; //munición restante
+    public int AmmoSize => ammoSize; //capacidad de balas
     #endregion
 
     #region References
@@ -106,6 +114,11 @@ public class GunSystem : MonoBehaviour
         }
         camOriginalRotation = fpsCam.transform.localEulerAngles;
 
+        if(crosshair != null)
+        {
+            crosshairOriginalScale = crosshair.localScale;
+            crosshairOriginalRotation = crosshair.localRotation;
+        }
         //Porcentaje de munición
         percentPerBullet = (float)maxAmmoPercent / ammoSize;
         UpdateAmmoUI();
@@ -144,6 +157,13 @@ public class GunSystem : MonoBehaviour
             weaponTargetEuler.x = weaponOriginalEuler.x - mouseDelta.y * 0.1f;
             weaponCurrentEuler = Vector3.Lerp(weaponCurrentEuler, weaponTargetEuler, Time.deltaTime * weaponDamping);
             weaponMesh.localEulerAngles = weaponCurrentEuler;
+        }
+
+        //Return Crosshair
+        if (crosshair != null)
+        {
+            crosshair.localScale = Vector3.Lerp(crosshair.localScale, crosshairOriginalScale, Time.deltaTime * crosshairReturnSpeed);
+            crosshair.localRotation = Quaternion.Lerp(crosshair.localRotation, crosshairOriginalRotation, Time.deltaTime * crosshairReturnSpeed);
         }
     }
 
@@ -198,7 +218,7 @@ public class GunSystem : MonoBehaviour
         }
         
         ApplyRecoil();
-        
+        AnimationCrosshair();
     }
     #endregion
 
@@ -272,6 +292,17 @@ public class GunSystem : MonoBehaviour
         return bulletsLeft - previousBullets; // devuelve lo que realmente entró
     }
 
+    #endregion
+
+    #region Animation Crosshair
+    void AnimationCrosshair()
+    {
+        if (crosshair == null) return;
+
+        crosshair.localScale = crosshairOriginalScale * crosshairScaleAmount;
+
+        crosshair.localRotation = Quaternion.Euler(crosshairOriginalRotation.eulerAngles.x, crosshairOriginalRotation.eulerAngles.y, crosshairOriginalRotation.eulerAngles.z + crosshairRotateAmount);
+    }
     #endregion
 
     #region Inputs

@@ -4926,7 +4926,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.030479169, y: 0.082220584}
   m_AnchorMax: {x: 0.245, y: 0.13032351}
-  m_AnchoredPosition: {x: -5.23999, y: -58}
+  m_AnchoredPosition: {x: -5.23999, y: -58.00006}
   m_SizeDelta: {x: -314, y: 49}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1876505554
@@ -4992,8 +4992,16 @@ PrefabInstance:
       value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 4159445354567149422, guid: d9f39bc75809cfe4796ee2631fa5b7bc, type: 3}
+      propertyPath: crosshair
+      value: 
+      objectReference: {fileID: 880589810}
+    - target: {fileID: 4159445354567149422, guid: d9f39bc75809cfe4796ee2631fa5b7bc, type: 3}
       propertyPath: reloadTime
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4159445354567149422, guid: d9f39bc75809cfe4796ee2631fa5b7bc, type: 3}
+      propertyPath: shootPoint
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 4159445354567149422, guid: d9f39bc75809cfe4796ee2631fa5b7bc, type: 3}
       propertyPath: recoilSpeed
@@ -5026,6 +5034,18 @@ PrefabInstance:
     - target: {fileID: 4159445354567149422, guid: d9f39bc75809cfe4796ee2631fa5b7bc, type: 3}
       propertyPath: impactLayer.m_Bits
       value: 832
+      objectReference: {fileID: 0}
+    - target: {fileID: 4159445354567149422, guid: d9f39bc75809cfe4796ee2631fa5b7bc, type: 3}
+      propertyPath: crosshairReturnSpeed
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4159445354567149422, guid: d9f39bc75809cfe4796ee2631fa5b7bc, type: 3}
+      propertyPath: crosshairScaleAmount
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4159445354567149422, guid: d9f39bc75809cfe4796ee2631fa5b7bc, type: 3}
+      propertyPath: crosshairRotateAmount
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 4789075039261063539, guid: d9f39bc75809cfe4796ee2631fa5b7bc, type: 3}
       propertyPath: healthBar
