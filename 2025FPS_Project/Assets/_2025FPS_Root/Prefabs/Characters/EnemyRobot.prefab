@@ -52,6 +52,10 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: cabccb3fa3738c3418e4266cb60b858d, type: 2}
+    - target: {fileID: -3013073991246514617, guid: f4e8383fbf2d86042956f601c853846a, type: 3}
+      propertyPath: m_Name
+      value: Lights2
+      objectReference: {fileID: 0}
     - target: {fileID: -1637163832734146133, guid: f4e8383fbf2d86042956f601c853846a, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -88,6 +92,14 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: cabccb3fa3738c3418e4266cb60b858d, type: 2}
+    - target: {fileID: 5063044712182195077, guid: f4e8383fbf2d86042956f601c853846a, type: 3}
+      propertyPath: m_Name
+      value: Lights1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5063044712182195077, guid: f4e8383fbf2d86042956f601c853846a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6841195988651135572, guid: f4e8383fbf2d86042956f601c853846a, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
