@@ -508,9 +508,9 @@ MonoBehaviour:
   pool: {fileID: 0}
   childToShrink: {fileID: 1796109003998219446}
   waitTimeBeforeShoot: 1
-  shrinkDuration: 1.5
+  shrinkDuration: 2
   shrinkFactor: 0.9
-  restoreSpeed: 5
+  restoreSpeed: 3
   enemyData: {fileID: 11400000, guid: c2eb823233453c0459dd72b4a1ea3a48, type: 2}
 --- !u!1 &8097036499890365445
 GameObject:
