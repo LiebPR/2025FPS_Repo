@@ -51,7 +51,7 @@ PrefabInstance:
     - target: {fileID: -1937193660380570780, guid: 1bd94e9e928a8e24ebf5fc3cbb978c78, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: efc2b556b8f922440b985f32b6ac005d, type: 2}
+      objectReference: {fileID: 2100000, guid: 5039b9447776521409df2abaffc24ea5, type: 2}
     - target: {fileID: 919132149155446097, guid: 1bd94e9e928a8e24ebf5fc3cbb978c78, type: 3}
       propertyPath: m_Name
       value: SM_Ground03

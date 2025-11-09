@@ -26,7 +26,7 @@ Transform:
   m_GameObject: {fileID: 438866744452589375}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.81, y: 0, z: -7.9}
+  m_LocalPosition: {x: -3.33, y: 0, z: -8.360001}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -51,8 +51,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 4.3671427, y: 6.560317, z: 0.31476927}
-  m_Center: {x: -2.139658, y: 3.2565303, z: 0.34261537}
+  m_Size: {x: 4.7389684, y: 6.560317, z: 0.31476927}
+  m_Center: {x: -2.3255708, y: 3.2565303, z: 0.34261537}
 --- !u!1 &3102499086162545343
 GameObject:
   m_ObjectHideFlags: 0
@@ -79,7 +79,7 @@ Transform:
   m_GameObject: {fileID: 3102499086162545343}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.39453664, z: -0, w: 0.9188802}
-  m_LocalPosition: {x: -0.74, y: 1.8, z: -4.26}
+  m_LocalPosition: {x: -0.26, y: 1.8, z: -4.72}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -132,7 +132,7 @@ Transform:
   m_GameObject: {fileID: 3523758342855386571}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0.48000002, y: 0, z: -0.45999956}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -214,11 +214,11 @@ PrefabInstance:
     - target: {fileID: 2508812124418183303, guid: 7bad0cf6c83d8c14cbb5a7e57e2b2217, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 3257f2ffdd3db6a4e98a7cdc6fb4fa61, type: 2}
+      objectReference: {fileID: 2100000, guid: 5039b9447776521409df2abaffc24ea5, type: 2}
     - target: {fileID: 2508812124418183303, guid: 7bad0cf6c83d8c14cbb5a7e57e2b2217, type: 3}
       propertyPath: 'm_Materials.Array.data[1]'
       value: 
-      objectReference: {fileID: 2100000, guid: 5de290d1d31a4d2419250cef1d7494ba, type: 2}
+      objectReference: {fileID: 2100000, guid: 5039b9447776521409df2abaffc24ea5, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
