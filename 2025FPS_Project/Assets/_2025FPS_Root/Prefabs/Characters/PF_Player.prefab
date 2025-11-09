@@ -118,7 +118,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
@@ -359,7 +359,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isPlayer: 1
-  maxHealth: 200
+  maxHealth: 100
   health: 0
   lowHealthColor: {r: 0.149055, g: 1, b: 0, a: 1}
   fullHealthColor: {r: 0, g: 0, b: 0, a: 0}
@@ -367,6 +367,7 @@ MonoBehaviour:
   healthBar: {fileID: 0}
   dropPrefab: {fileID: 0}
   percentChance: 0.3
+  vfxPoolName: EnemyDeathVFX
 --- !u!95 &8061097929383227906
 Animator:
   serializedVersion: 7

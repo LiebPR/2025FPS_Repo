@@ -19,9 +19,9 @@ MonoBehaviour:
   obstacleMask:
     serializedVersion: 2
     m_Bits: 256
-  stopAreaRadius: 2
-  minStopDistance: 1.5
-  maxStopDistance: 3.5
+  stopAreaRadius: 3
+  minStopDistance: 3
+  maxStopDistance: 4
   stopTransitionTime: 0.5
   perceptionDelay: 0.5
   lostDelay: 1

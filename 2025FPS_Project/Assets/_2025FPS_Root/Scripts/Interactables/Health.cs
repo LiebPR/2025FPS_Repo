@@ -108,18 +108,19 @@ public class Health : MonoBehaviour
 
         if (!isPlayer)
         {
-            //Solo lanza el evento OnHit si NO esta en Chase ni Alert
+            // Lanzamos el evento OnHit siempre que recibimos daño
+            OnHit?.Invoke(transform.position);
+
+            //Solo lanza el material de daño si NO está en Chase ni Alert
             if (fsm != null && fsm.currentState != EnemyState.Chase && fsm.currentState != EnemyState.Alert)
             {
-                OnHit?.Invoke(transform.position);
+                // Aplicamos el material de daño a todos los MeshRenderers
+                foreach (MeshRenderer rend in enemyRends)
+                {
+                    rend.material = damagedMat;
+                }
+                Invoke(nameof(ResetDamageMat), 0.1f);
             }
-
-            //Aplicamos el material de daño a todos los MeshRenderers
-            foreach(MeshRenderer rend in enemyRends)
-            {
-                rend.material = damagedMat;
-            }
-            Invoke(nameof(ResetDamageMat), 0.1f);
         }
 
         if (currentHealth <= 0)
