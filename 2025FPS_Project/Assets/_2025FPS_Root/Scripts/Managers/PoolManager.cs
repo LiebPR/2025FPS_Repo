@@ -3,7 +3,7 @@ using UnityEngine;
 
 /// <summary>
 /// PoolManager: Sistema de manejo e pools que utiliza una configuración externa (ScriptableObject).
-/// Puede usarse como singelton global o como instancia independiente.
+/// Puede usarse como singleton global o como instancia independiente.
 /// </summary>
 public class PoolManager : MonoBehaviour
 {
@@ -11,10 +11,26 @@ public class PoolManager : MonoBehaviour
     [SerializeField] PoolItemData poolData; //ref al scriptable que contiene la configuración de las pools.
 
     //Diccionario interno que mantiene las colas de objetos activos e interactivos por pool
-    Dictionary<string, Queue<GameObject>> poolDictionary = new Dictionary<string, Queue<GameObject>>(); 
-   
+    Dictionary<string, Queue<GameObject>> poolDictionary = new Dictionary<string, Queue<GameObject>>();
+
     bool initialized = false; //indica si las pools ya han sido inicializadas
+
+    // Instancia Singleton
+    public static PoolManager Instance { get; private set; } // Propiedad estática
     #endregion
+
+    // Asegurarse de que solo haya una instancia de PoolManager
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject); // Si ya hay una instancia, destruir esta
+            return;
+        }
+
+        Instance = this; // Asignar la instancia
+        DontDestroyOnLoad(gameObject); // Mantener esta instancia en todas las escenas
+    }
 
     //Inicializa todas las pools declaradas en poolData
     public void Initialize()
@@ -23,13 +39,13 @@ public class PoolManager : MonoBehaviour
 
         poolDictionary.Clear(); //limpia cualquier pool anterior
 
-        foreach(var pool in poolData.pools)
+        foreach (var pool in poolData.pools)
         {
             if (pool.prefab == null) continue;
 
             Queue<GameObject> objectPool = new Queue<GameObject>();
 
-            for(int i = 0; i < pool.initialSize; i++)
+            for (int i = 0; i < pool.initialSize; i++)
             {
                 GameObject obj = Instantiate(pool.prefab);
                 obj.SetActive(false); // inicialmente inactivos
@@ -45,19 +61,19 @@ public class PoolManager : MonoBehaviour
     //Spawnea desde la pool indicada, colocándolo en la posición y rotación dadas.
     public GameObject Spawn(string poolName, Vector3 pos, Quaternion rot)
     {
-        if(!poolDictionary.ContainsKey(poolName)) return null;
+        if (!poolDictionary.ContainsKey(poolName)) return null;
 
         var config = poolData.pools.Find(poolDictionary => poolDictionary.poolName == poolName); //obtiene la configuración de la pool
         var objects = poolDictionary[poolName]; //cola de objetos
 
         GameObject obj;
 
-        if(objects.Count == 0 && config.canExpand)
+        if (objects.Count == 0 && config.canExpand)
         {
             //Instancia dinámica si se permite expandir 
             obj = Instantiate(config.prefab, pos, rot);
         }
-        else if(objects.Count > 0)
+        else if (objects.Count > 0)
         {
             obj = objects.Dequeue(); //saca el objeto de la cola
             obj.transform.SetPositionAndRotation(pos, rot); //reposiciona
@@ -72,9 +88,9 @@ public class PoolManager : MonoBehaviour
     }
 
     //Devuelve un objeto a su pool correspondiente
-    public void Despawn (string poolName, GameObject obj)
+    public void Despawn(string poolName, GameObject obj)
     {
-        if(!poolDictionary.ContainsKey(poolName))
+        if (!poolDictionary.ContainsKey(poolName))
         {
             Destroy(obj);
             return;
@@ -92,11 +108,11 @@ public class PoolManager : MonoBehaviour
     //Limpia todas las pools y destruye los objetos instaciados
     public void Clear()
     {
-        foreach(var kvp in poolDictionary)
+        foreach (var kvp in poolDictionary)
         {
-            foreach(var obj in kvp.Value)
+            foreach (var obj in kvp.Value)
             {
-                if(obj != null) Destroy(obj);
+                if (obj != null) Destroy(obj);
             }
         }
 

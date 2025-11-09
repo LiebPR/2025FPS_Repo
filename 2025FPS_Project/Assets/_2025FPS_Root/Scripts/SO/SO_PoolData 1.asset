@@ -17,3 +17,19 @@ MonoBehaviour:
     prefab: {fileID: 7642557723264205144, guid: 5ed4239ec4509634f938e2f5e681e01f, type: 3}
     initialSize: 5
     canExpand: 1
+  - poolName: MuzzleFlash
+    prefab: {fileID: 2821544132649924553, guid: 5ef0a94bf19bd8f40b51422017e5c668, type: 3}
+    initialSize: 5
+    canExpand: 1
+  - poolName: HitEffect
+    prefab: {fileID: 4411316486304211303, guid: 6613e4685b94f7749afde40dc14f0e81, type: 3}
+    initialSize: 5
+    canExpand: 1
+  - poolName: EnemyDeathVFX
+    prefab: {fileID: 3537121407974028455, guid: 5e6656ee123143f4db022b7c7a31a60a, type: 3}
+    initialSize: 5
+    canExpand: 1
+  - poolName: ChargeEffect
+    prefab: {fileID: 5365793910920681531, guid: 5b87fd1f3cf8cf441b45b8f98b2c1b33, type: 3}
+    initialSize: 20
+    canExpand: 1

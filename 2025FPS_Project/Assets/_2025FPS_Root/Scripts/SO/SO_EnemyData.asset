@@ -12,16 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 444a0354e1cb94c45b644d239ae73916, type: 3}
   m_Name: SO_EnemyData
   m_EditorClassIdentifier: 
-  debugLogs: 1
+  debugLogs: 0
   visionRadius: 5
   visionAngle: 80
   perceptionRadius: 2
   obstacleMask:
     serializedVersion: 2
     m_Bits: 256
-  stopAreaRadius: 2
-  minStopDistance: 1.5
-  maxStopDistance: 3.5
+  stopAreaRadius: 3
+  minStopDistance: 3
+  maxStopDistance: 4
   stopTransitionTime: 0.5
   perceptionDelay: 0.5
   lostDelay: 1

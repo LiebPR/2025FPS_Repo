@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8960988138973855157}
   - component: {fileID: 5355880459496525722}
   - component: {fileID: 1576233902378046649}
+  - component: {fileID: 2907928416321436125}
   m_Layer: 0
   m_Name: VFX_Laser
   m_TagString: Untagged
@@ -53,7 +54,7 @@ ParticleSystem:
   emitterVelocityMode: 1
   looping: 0
   prewarm: 0
-  playOnAwake: 1
+  playOnAwake: 0
   useUnscaledTime: 0
   autoRandomSeed: 1
   startDelay:
@@ -225,8 +226,8 @@ ParticleSystem:
     startColor:
       serializedVersion: 2
       minMaxState: 2
-      minColor: {r: 0.120446324, g: 1, b: 0, a: 1}
-      maxColor: {r: 0.118310586, g: 0.8113208, b: 0, a: 1}
+      minColor: {r: 0.66421795, g: 0, b: 1, a: 1}
+      maxColor: {r: 0.39364368, g: 0, b: 0.8117647, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -4894,6 +4895,19 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
+--- !u!114 &2907928416321436125
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2821544132649924553}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a79fba548c4367549a6a380864c8bb24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lifeTime: 1
 --- !u!1 &3241618242794548941
 GameObject:
   m_ObjectHideFlags: 0
@@ -4937,7 +4951,7 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 2
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.7248074, g: 0.3443396, b: 1, a: 1}
   m_Intensity: 1
   m_Range: 10
   m_SpotAngle: 30
@@ -5065,7 +5079,7 @@ ParticleSystem:
   emitterVelocityMode: 1
   looping: 0
   prewarm: 0
-  playOnAwake: 1
+  playOnAwake: 0
   useUnscaledTime: 0
   autoRandomSeed: 1
   startDelay:
@@ -9956,7 +9970,7 @@ ParticleSystem:
   emitterVelocityMode: 1
   looping: 0
   prewarm: 0
-  playOnAwake: 1
+  playOnAwake: 0
   useUnscaledTime: 0
   autoRandomSeed: 1
   startDelay:
@@ -10128,8 +10142,8 @@ ParticleSystem:
     startColor:
       serializedVersion: 2
       minMaxState: 2
-      minColor: {r: 0.12156863, g: 1, b: 0, a: 1}
-      maxColor: {r: 0.11764706, g: 0.8117647, b: 0, a: 1}
+      minColor: {r: 0.486979, g: 0, b: 1, a: 1}
+      maxColor: {r: 0.35856923, g: 0, b: 0.8117647, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}

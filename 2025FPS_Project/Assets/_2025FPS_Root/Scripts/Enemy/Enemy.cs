@@ -34,7 +34,7 @@ public class Enemy : ScriptableObject
     //MOVIMIENTO Y ESTADOS
 
     public LayerMask groundLayer;
-
+    public float angularSpeed;
     [Header("Patrol Settings")]
     public float patrolSpeed = 2f; //velocidad en patrol
     public float walkPointRange = 10f; //radio máximo para generar puntos de patrulla
