@@ -57,7 +57,7 @@ public class GameManager : MonoBehaviour
         AudioManager.Instance.StopAllSFXExceptBGM();
         SetState(GameState.GameOver);
         OnGameOver?.Invoke();
-        SceneManagerSimple.Instance.LoadScene("SCN_Lose");
+        SceneManagerSimple.Instance.LoadScene("SCN_LoseMenu");
     }
 
     public void GameWin()
@@ -66,7 +66,7 @@ public class GameManager : MonoBehaviour
 
         SetState(GameState.Win);
         OnGameWin?.Invoke();
-        SceneManagerSimple.Instance.LoadScene("SCN_Win");
+        SceneManagerSimple.Instance.LoadScene("SCN_WinMenu");
     }
     #endregion
 
@@ -74,6 +74,7 @@ public class GameManager : MonoBehaviour
     public void StartGame()
     {
         SetState(GameState.Playing);
+        AudioManager.Instance.PlayLoop("GamePlayBGM");
     }
 
     public void RestartGame()

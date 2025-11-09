@@ -52,6 +52,12 @@ public class FPSController : MonoBehaviour
     bool isSliding;
     Coroutine slideCoroutine;
 
+    [Header("Footstep Audio")]
+    [SerializeField] AudioSource footstepAudioSource; // AudioSource para el sonido de caminar
+    [SerializeField] AudioClip walkSound; // Clip de sonido para caminar
+    [SerializeField] AudioClip sprintSound; // Clip de sonido para correr
+    bool isPlayingFootstepSound = false;
+
     //Input Variables
     Vector2 moveInput;
     Vector2 lookInput;
@@ -115,6 +121,38 @@ public class FPSController : MonoBehaviour
     
     void Update()
     {
+        // Comprobar si estamos en movimiento
+        if (HasMovementInput() && isGrounded && !isSliding)
+        {
+
+            if (!isPlayingFootstepSound)
+            {
+                PlayFootstepSound();
+            }
+
+            // Si el jugador está corriendo, aumentar el pitch
+            if (isSprinting)
+            {
+                footstepAudioSource.pitch = Mathf.Lerp(footstepAudioSource.pitch, 1.7f, Time.deltaTime * 5f); // Aumentar el pitch
+            }
+            else if (isCrouching)
+            {
+                footstepAudioSource.pitch = Mathf.Lerp(footstepAudioSource.pitch, 0.9f, Time.deltaTime * 5f); // Pitch normal
+            }
+            else
+            {
+                footstepAudioSource.pitch = Mathf.Lerp(footstepAudioSource.pitch, 1.5f, Time.deltaTime * 5f); // Pitch normal
+            }
+        }
+        else
+        {
+            // Detener el sonido si no hay movimiento
+            if (isPlayingFootstepSound)
+            {
+                StopFootstepSound();
+            }
+        }
+
         //Groundcheck
         isGrounded = Physics.CheckSphere(groundCheck.transform.position, groundCheckRadius, groundLayer);
         //Debug ray: visible only in Scene
@@ -301,6 +339,21 @@ public class FPSController : MonoBehaviour
 
         // Evitar sprint si estás agachado
         if (isCrouching) isSprinting = false;
+    }
+    #endregion
+
+    #region Audio
+    void PlayFootstepSound()
+    {
+        footstepAudioSource.clip = isSprinting ? sprintSound : walkSound; // Cambiar el sonido según si se está sprintando
+        footstepAudioSource.Play();
+        isPlayingFootstepSound = true;
+    }
+
+    void StopFootstepSound()
+    {
+        footstepAudioSource.Stop();
+        isPlayingFootstepSound = false;
     }
     #endregion
 }

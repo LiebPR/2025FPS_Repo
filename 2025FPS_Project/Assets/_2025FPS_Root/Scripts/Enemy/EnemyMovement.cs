@@ -264,32 +264,42 @@ public class EnemyMovement : MonoBehaviour
     }
     #endregion
 
-    #region Public Methods
-    // Detiene el movimiento del enemigo y lo mantiene en su posición actual.
+    #region Movement Control
+    // Detiene el movimiento del enemigo
     public void StopMovement()
     {
         agent.isStopped = true;  // Detiene al agente de navegación
         agent.velocity = Vector3.zero;  // Detiene la velocidad del agente (si es necesario)
-
-        // Detener la rotación (mantiene la rotación actual)
-        agent.angularSpeed = 0f;  // Detiene la rotación automática del NavMeshAgent
-        transform.rotation = transform.rotation;  // Asegura que no se realicen cambios en la rotación
     }
 
-    //Reactiva el movimiento del enemigo y permite que continúe con su destino.
+    // Reactiva el movimiento del enemigo
     public void ResumeMovement()
     {
         agent.isStopped = false;  // Reactiva el agente de navegación
-        agent.angularSpeed = enemyData.angularSpeed;
+    }
+
+    // Detiene la rotación del enemigo
+    public void StopRotation()
+    {
+        agent.angularSpeed = 0f;  // Detiene la rotación automática del NavMeshAgent
+        agent.updateRotation = false;  // Desactiva la actualización automática de rotación
+    }
+
+    // Reactiva la rotación del enemigo
+    public void ResumeRotation()
+    {
+        agent.angularSpeed = 360f; // Restaura la velocidad angular
+        agent.updateRotation = true;  // Restaura la rotación automática
     }
     #endregion
 
-    //Aplica el material proporcionado tanto al enemigo como a sus hijos
-    private void ApplyMaterialToSelfAndChildren(Material material)
+    #region Material Management
+    void ApplyMaterialToSelfAndChildren(Material material)
     {
-        foreach (Renderer renderer in renderers)
+        foreach (var renderer in renderers)
         {
             renderer.material = material;
         }
     }
+    #endregion
 }

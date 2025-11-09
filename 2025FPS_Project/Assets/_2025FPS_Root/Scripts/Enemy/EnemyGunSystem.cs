@@ -10,6 +10,7 @@ public class EnemyGunSystem : MonoBehaviour
     [SerializeField] Transform shootPoint;
     [SerializeField] string chargeEffect = "ChargeEffect"; // Efecto de partículas al disparar
     [SerializeField] PoolManager pool; // Pool de partículas
+    [SerializeField] private Material laserMaterial;
 
     #region New Variables
     [SerializeField] Transform childToShrink; // Hijo al que se le cambiará la escala (puedes asignar el hijo desde el editor)
@@ -32,6 +33,7 @@ public class EnemyGunSystem : MonoBehaviour
     VisionSystem vision;
     LevitationMeshEffect levitationEffect;
     EnemyMovement enemyMovement;
+    Health healthComponent; // Referencia al componente Health
     #endregion
 
     private void Awake()
@@ -41,6 +43,7 @@ public class EnemyGunSystem : MonoBehaviour
         enemyMovement = GetComponent<EnemyMovement>();
         pool = PoolManager.Instance; // Referencia al PoolManager de forma automática
         levitationEffect = GetComponentInChildren<LevitationMeshEffect>();
+        healthComponent = GetComponent<Health>(); // Obtener el componente Health
 
         // Almacena el tamaño original del hijo
         if (childToShrink != null)
@@ -66,7 +69,7 @@ public class EnemyGunSystem : MonoBehaviour
 
     private void Update()
     {
-        if (CanAttackTarget())
+        if (CanAttackTarget()) // Verificamos si el enemigo está muerto
         {
             TryShoot();
         }
@@ -118,8 +121,7 @@ public class EnemyGunSystem : MonoBehaviour
         }
 
         levitationEffect.StartLevitating();
-        // Reactivar movimiento después de disparar
-        enemyMovement.ResumeMovement();
+
 
         yield return new WaitForSeconds(enemyData.shootingCooldown);
         canShoot = true;
@@ -131,11 +133,25 @@ public class EnemyGunSystem : MonoBehaviour
 
         Vector3 direction = shootPoint.forward;
 
+        // Reactivar movimiento después de disparar
+        enemyMovement.ResumeMovement();
+
         if (Physics.Raycast(shootPoint.position, direction, out hit, enemyData.range, enemyData.impactLayer))
         {
             Debug.DrawRay(shootPoint.position, direction * enemyData.range, Color.cyan, 1f);
 
-            // Daño al jugador
+            // Instanciar el láser desde la pool
+            GameObject laser = pool.Spawn("LaserPool", shootPoint.position, shootPoint.rotation);
+
+            // Asegurarse de que el objeto instanciado tiene el componente Laser
+            Laser laserScript = laser.GetComponent<Laser>();
+            if (laserScript != null)
+            {
+                // Llamamos a Initialize para configurar la posición de inicio y final del rayo
+                laserScript.Initialize(shootPoint.position, hit.point, laserMaterial);
+            }
+
+            // Daño al jugador si es necesario
             if (hit.collider.TryGetComponent(out Health health))
             {
                 health.TakeDamage(enemyData.damage);

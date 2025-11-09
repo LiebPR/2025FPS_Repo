@@ -37,3 +37,15 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 4ffc0de07cda3af4c90c7f85972f476d, type: 3}
     group: 0
     defaultVolume: 1
+  - id: LoseMenuBGM
+    clip: {fileID: 8300000, guid: 7e655b22dceb73148b8299b75d5bdc38, type: 3}
+    group: 0
+    defaultVolume: 1
+  - id: GamePlayBGM
+    clip: {fileID: 8300000, guid: 268656af062dea641a233d2388dcded9, type: 3}
+    group: 0
+    defaultVolume: 0.5
+  - id: Walk
+    clip: {fileID: 8300000, guid: 936ee34be91304e4fae1719170b7cf59, type: 3}
+    group: 2
+    defaultVolume: 2
