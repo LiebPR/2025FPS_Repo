@@ -21,7 +21,7 @@ public class Health : MonoBehaviour
     [Header("Feedback Configuration")]
     [SerializeField] Material damagedMat; //Material feedback de daño
     Material baseMat; //Material base del enemigo
-    MeshRenderer enemyRend; //Referencia al MeshRenderer propio
+    MeshRenderer[] enemyRends; //Array para almacenar todos los MeshRenderers del enemigo
 
     [Header("Player UI")]
     [SerializeField] Image healthBar;
@@ -48,13 +48,14 @@ public class Health : MonoBehaviour
 
     private void Awake()
     {
-        enemyRend = GetComponent<MeshRenderer>();
+        enemyRends = GetComponentsInChildren<MeshRenderer>();
+
         health = maxHealth;
         currentHealth = maxHealth;
 
         if (!isPlayer)
         {
-            baseMat = enemyRend.material;
+            baseMat = enemyRends[0].material; //usamos el primer meshRenderer como base
             fsm = GetComponent<EnemyStateMachine>();
         }
         else
@@ -78,7 +79,11 @@ public class Health : MonoBehaviour
     {
         if (!isPlayer)
         {
-            enemyRend.material = baseMat;
+            //Restauramos todos los materiales a su estado original
+            foreach(MeshRenderer rend in enemyRends)
+            {
+                rend.material = baseMat;
+            }
         }
         currentHealth = maxHealth;
     }
@@ -109,7 +114,11 @@ public class Health : MonoBehaviour
                 OnHit?.Invoke(transform.position);
             }
 
-            enemyRend.material = damagedMat; //feedback visual de impacto
+            //Aplicamos el material de daño a todos los MeshRenderers
+            foreach(MeshRenderer rend in enemyRends)
+            {
+                rend.material = damagedMat;
+            }
             Invoke(nameof(ResetDamageMat), 0.1f);
         }
 
@@ -123,7 +132,10 @@ public class Health : MonoBehaviour
     void ResetDamageMat()
     {
         if (isPlayer) return;
-        enemyRend.material = baseMat;
+        foreach(MeshRenderer rend in enemyRends)
+        {
+            rend.material = baseMat;
+        }
     }
 
     //Gestiona la muerte del enemigo y ejecuta el evento correspondiente
