@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using static UnityEngine.Rendering.DebugUI;
 
@@ -48,6 +49,7 @@ public class AudioManager : MonoBehaviour
     }
     #endregion
 
+    // Reproducir sonido basado en el ID.
     public void Play(string id)
     {
         AudioEntry entry = table.Get(id);
@@ -60,6 +62,30 @@ public class AudioManager : MonoBehaviour
             case AudioGroup.SFX: PlaySFX(entry); break;
         }
     }
+
+    // Reproducir música de fondo (BGM)
+    void PlayBGM(AudioEntry entry)
+    {
+        bgmSource.clip = entry.clip;
+        bgmSource.volume = entry.defaultVolume;
+        bgmSource.loop = true;
+        bgmSource.Play();
+    }
+
+    // Reproducir UI (sonidos de interfaz)
+    void PlayUI(AudioEntry entry)
+    {
+        uiSource.PlayOneShot(entry.clip, entry.defaultVolume);
+    }
+
+    // Reproducir SFX
+    void PlaySFX(AudioEntry entry)
+    {
+        sfxSource.transform.position = playerTransform.position;
+        sfxSource.PlayOneShot(entry.clip, entry.defaultVolume);
+    }
+
+    // Reproducir bucle de SFX (sonido ambiental o música)
     public void PlayLoop(string id)
     {
         AudioEntry entry = table.Get(id);
@@ -71,12 +97,43 @@ public class AudioManager : MonoBehaviour
         sfxSource.Play();
     }
 
+    // Detener el loop de la música de fondo o cualquier otro loop
     public void StopLoop()
     {
-        sfxSource.loop = false;
-        sfxSource.Stop();
+        if (bgmSource.isPlaying)
+        {
+            bgmSource.Stop();
+            bgmSource.loop = false;
+        }
+
+        if (sfxSource.isPlaying && sfxSource.loop)
+        {
+            sfxSource.Stop();
+            sfxSource.loop = false;
+        }
     }
 
+    // Detener la música de fondo (BGM) con un fade-out
+    public void FadeOutBGM(float fadeDuration)
+    {
+        StartCoroutine(FadeOutBGMCoroutine(fadeDuration));
+    }
+
+    private IEnumerator FadeOutBGMCoroutine(float fadeDuration)
+    {
+        float startVolume = bgmSource.volume;
+
+        for (float t = 0; t < fadeDuration; t += Time.deltaTime)
+        {
+            bgmSource.volume = Mathf.Lerp(startVolume, 0, t / fadeDuration);
+            yield return null;
+        }
+
+        bgmSource.Stop();
+        bgmSource.volume = startVolume; // Restablecer el volumen a su valor original.
+    }
+
+    // Reproducir bucle de SFX 3D (sonido espacial)
     public void Play3D(string id, Vector3 position)
     {
         AudioEntry entry = table.Get(id);
@@ -98,6 +155,8 @@ public class AudioManager : MonoBehaviour
     }
 
     private Dictionary<string, AudioSource> activeLoops = new Dictionary<string, AudioSource>();
+
+    // Reproducir bucle de SFX 3D que sigue un objeto
     public void Play3DLoop(string id, Transform followTarget)
     {
         // Si ya está sonando, no duplicamos
@@ -120,6 +179,7 @@ public class AudioManager : MonoBehaviour
         StartCoroutine(FollowTarget(src, followTarget));
     }
 
+    // Detener el bucle de SFX 3D
     public void Stop3DLoop(string id)
     {
         if (!activeLoops.ContainsKey(id)) return;
@@ -132,7 +192,8 @@ public class AudioManager : MonoBehaviour
         activeLoops.Remove(id);
     }
 
-    System.Collections.IEnumerator FollowTarget(AudioSource src, Transform target)
+    // Controlar la posición de un SFX 3D mientras sigue un objeto
+    private IEnumerator FollowTarget(AudioSource src, Transform target)
     {
         while (src != null && src.isPlaying && target != null)
         {
@@ -141,13 +202,13 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    // Detener todos los SFX excepto la música de fondo
     public void StopAllSFXExceptBGM()
     {
-        // 1. Detener UI y SFX base
         uiSource.Stop();
         sfxSource.Stop();
 
-        // 2. Detener todos los loops 3D activos
+        // Detener todos los loops 3D activos
         foreach (var src in activeLoops.Values)
         {
             if (src != null)
@@ -158,9 +219,10 @@ public class AudioManager : MonoBehaviour
                 pool.Enqueue(src);
             }
         }
+
         activeLoops.Clear();
 
-        // 3. Detener cualquier Audio3D que esté sonando del pool
+        // Detener cualquier Audio3D que esté sonando del pool
         foreach (Transform child in transform)
         {
             AudioSource src = child.GetComponent<AudioSource>();
@@ -172,37 +234,19 @@ public class AudioManager : MonoBehaviour
             }
         }
     }
-    #region Internos
-    void PlayBGM(AudioEntry entry)
-    {
-        bgmSource.clip = entry.clip;
-        bgmSource.volume = entry.defaultVolume;
-        bgmSource.loop = true;
-        bgmSource.Play();
-    }
 
-    void PlayUI(AudioEntry entry)
-    {
-        uiSource.PlayOneShot(entry.clip, entry.defaultVolume);
-    }
-
-    void PlaySFX(AudioEntry entry)
-    {
-        sfxSource.transform.position = playerTransform.position;
-        sfxSource.PlayOneShot(entry.clip, entry.defaultVolume);
-    }
-
+    // Obtener un AudioSource del pool 3D
     AudioSource Get3DSource()
     {
         if (pool.Count == 0) CrearPool3D();
         return pool.Dequeue();
     }
 
-    System.Collections.IEnumerator Release3DSource(AudioSource src)
+    // Liberar un AudioSource 3D después de que deje de sonar
+    private IEnumerator Release3DSource(AudioSource src)
     {
         yield return new WaitWhile(() => src.isPlaying);
         src.gameObject.SetActive(false);
         pool.Enqueue(src);
     }
-    #endregion
 }

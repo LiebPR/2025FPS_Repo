@@ -6,10 +6,15 @@ using UnityEngine.UI;
 public class GunSystem : MonoBehaviour
 {
     #region General Variables
+    [Header("Particle Gun")]
+    [SerializeField] string muzzleFlash = "MuzzleFlash";
+    [SerializeField] string hitEffect = "HitEffect";
+
     [Header("General References")]
     [SerializeField] Camera fpsCam;
     [SerializeField] Transform shootPoint;
     [SerializeField] LayerMask impactLayer;
+    [SerializeField] PoolManager pool;
     RaycastHit hit;
 
     [Header("Ammo UI")]
@@ -207,6 +212,23 @@ public class GunSystem : MonoBehaviour
         
         Debug.DrawRay(fpsCam.transform.position, spreadDir * range, Color.red, 1f);
 
+        // Muzzle flash
+        if (shootPoint != null && pool.HasPool(muzzleFlash))
+        {
+            // Dirección hacia donde mira la cámara
+            Vector3 forwardDir = fpsCam.transform.forward;
+
+            // Posición ligeramente adelante del shootPoint para evitar que se meta dentro del arma
+            Vector3 spawnPos = shootPoint.position + forwardDir * 0.1f; // 0.1 unidades adelante, ajusta según tu arma
+
+            // Spawn con rotación alineada a la cámara
+            Quaternion spawnRot = Quaternion.LookRotation(forwardDir);
+
+            GameObject muzzle = pool.Spawn(muzzleFlash, spawnPos, spawnRot);
+            if (muzzle.TryGetComponent<ParticleSystem>(out ParticleSystem ps)) ps.Play();
+        }
+
+        // Raycast hit
         if (Physics.Raycast(fpsCam.transform.position, spreadDir, out hit, range, impactLayer))
         {
             Health health = hit.collider.GetComponent<Health>() ?? hit.collider.GetComponentInParent<Health>();
@@ -215,8 +237,17 @@ public class GunSystem : MonoBehaviour
                 int appliedDamage = hit.collider.gameObject.layer == LayerMask.NameToLayer("HeadShoot") ? 100 : damage;
                 health.TakeDamage(appliedDamage);
             }
+
+            // Impact VFX
+            if (pool.HasPool(hitEffect))
+            {
+                GameObject impact = pool.Spawn(hitEffect, hit.point, Quaternion.LookRotation(hit.normal));
+                if (impact.TryGetComponent<ParticleSystem>(out ParticleSystem ps)) ps.Play();
+            }
+
+            lastHitPoint = hit.point;
         }
-        
+
         ApplyRecoil();
         AnimationCrosshair();
     }

@@ -28,6 +28,23 @@ public class EnemyGunSystem : MonoBehaviour
         vision = GetComponent<VisionSystem>();
     }
 
+    private void OnEnable()
+    {
+        canShoot = true; // Restablece el valor de canShoot cuando el enemigo se activa
+
+        // Reasignar las referencias si es necesario
+        if (fsm == null) fsm = GetComponent<EnemyStateMachine>();
+        if (vision == null) vision = GetComponent<VisionSystem>();
+    }
+
+    private void OnDisable()
+    {
+        if (shootingRoutine != null)
+        {
+            StopCoroutine(shootingRoutine); // Detiene cualquier coroutine activa de disparo
+        }
+    }
+
     private void Update()
     {
         if (CanAttackTarget())
@@ -55,14 +72,14 @@ public class EnemyGunSystem : MonoBehaviour
     {
         if (shootPoint == null) return;
 
-        //Dispara solo hacia adelante, según la rotación actual del enemigo
+        // Dispara solo hacia adelante, según la rotación actual del enemigo
         Vector3 direction = shootPoint.forward;
 
-        if(Physics.Raycast(shootPoint.position, direction, out hit, enemyData.range, enemyData.impactLayer))
+        if (Physics.Raycast(shootPoint.position, direction, out hit, enemyData.range, enemyData.impactLayer))
         {
             Debug.DrawRay(shootPoint.position, direction * enemyData.range, Color.cyan, 1f);
 
-            if(hit.collider.TryGetComponent(out Health health))
+            if (hit.collider.TryGetComponent(out Health health))
             {
                 health.TakeDamage(enemyData.damage);
             }
@@ -73,17 +90,17 @@ public class EnemyGunSystem : MonoBehaviour
     #region Conditions 
     bool CanAttackTarget()
     {
-        if(vision == null || fsm == null) return false;
-        if(!vision.CanSeeTarget) return false;
-        if(fsm.currentState != EnemyState.Chase) return false;
-        if(!IsTargetInAttackArea()) return false;
+        if (vision == null || fsm == null) return false;
+        if (!vision.CanSeeTarget) return false;
+        if (fsm.currentState != EnemyState.Chase) return false;
+        if (!IsTargetInAttackArea()) return false;
 
         return true;
     }
 
     bool IsTargetInAttackArea()
     {
-        if(vision.Target == null) return false;
+        if (vision.Target == null) return false;
 
         float distance = Vector3.Distance(transform.position, vision.Target.position);
         return distance <= enemyData.attackRange;
@@ -93,7 +110,7 @@ public class EnemyGunSystem : MonoBehaviour
     #region Gizmos
     private void OnDrawGizmosSelected()
     {
-        //Visualización del área de ataque
+        // Visualización del área de ataque
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, enemyData.attackRange);
     }

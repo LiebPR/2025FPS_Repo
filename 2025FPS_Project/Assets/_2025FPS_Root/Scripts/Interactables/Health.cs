@@ -1,22 +1,25 @@
-using System;
+﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// EnemyHealth: Sistema de salud de enemigo. Gestiona da�o, feedback visual y evento de muerte.
+/// EnemyHealth: Sistema de salud de enemigo. Gestiona daño, feedback visual y evento de muerte.
 /// </summary>
 public class Health : MonoBehaviour
 {
     #region General Variables
     [Header("Health System Management")]
     [SerializeField] bool isPlayer;
-    [SerializeField] int maxHealth = 100; //Vida m�xima del enemigo
+    [SerializeField] int maxHealth = 100; //Vida máxima del enemigo
     [SerializeField] int health; //Vida actual del enemigo
+    [SerializeField] Color lowHealthColor = Color.yellow;
+    [SerializeField] Color fullHealthColor;
+    string poolName = "Enemy";
 
     int currentHealth;
 
     [Header("Feedback Configuration")]
-    [SerializeField] Material damagedMat; //Material feedback de da�o
+    [SerializeField] Material damagedMat; //Material feedback de daño
     Material baseMat; //Material base del enemigo
     MeshRenderer enemyRend; //Referencia al MeshRenderer propio
 
@@ -24,8 +27,11 @@ public class Health : MonoBehaviour
     [SerializeField] Image healthBar;
 
     [Header("Ammo Drop Settings")]
-    [SerializeField] GameObject dropPrefab; // Prefab de munici�n
-    [SerializeField, Range(0f, 1f)] float percentChance = 0.3f; // Probabilidad de soltar munici�n (0.3 = 30%)
+    [SerializeField] GameObject dropPrefab; // Prefab de munición
+    [SerializeField, Range(0f, 1f)] float percentChance = 0.3f; // Probabilidad de soltar munición (0.3 = 30%)
+
+    [Header("VFX Settings")]
+    [SerializeField] string vfxPoolName = "EnemyDeathVFX";
     #endregion
 
     #region Events
@@ -37,10 +43,15 @@ public class Health : MonoBehaviour
     EnemyStateMachine fsm;
     #endregion
 
+    // Flag para gestionar si el enemigo puede recibir daño
+    bool isDamageable = true;
+
     private void Awake()
     {
         enemyRend = GetComponent<MeshRenderer>();
         health = maxHealth;
+        currentHealth = maxHealth;
+
         if (!isPlayer)
         {
             baseMat = enemyRend.material;
@@ -51,6 +62,14 @@ public class Health : MonoBehaviour
             //Inicializar barra de vida del jugador
             if (healthBar != null)
                 healthBar.fillAmount = 1f;
+        }
+
+        //Cambio de color en la barra de vida
+        if (isPlayer && healthBar != null)
+        {
+            currentHealth = maxHealth;
+            fullHealthColor = healthBar.color;
+            healthBar.fillAmount = 1f;
         }
     }
 
@@ -64,26 +83,32 @@ public class Health : MonoBehaviour
         currentHealth = maxHealth;
     }
 
-    //Aplica da�o al enemigo y gestiona el feedback visual.
+    //Aplica daño al enemigo y gestiona el feedback visual.
     public void TakeDamage(int damage)
     {
+        if (!isDamageable) return; // Si el enemigo no puede recibir daño, no hacemos nada
+
         currentHealth -= damage;
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
-        if(isPlayer && healthBar != null)
+        if (isPlayer && healthBar != null)
         {
-            //Actualizar barra de vida
-            healthBar.fillAmount = (float) currentHealth / maxHealth;
+            float healthPercent = (float)currentHealth / maxHealth;
+            healthBar.fillAmount = healthPercent;
+
+            // transición azul (fullHealthColor) -> amarillo (lowHealthColor)
+            float t = 1f - healthPercent; // ahora t = 0 cuando vida llena, t = 1 cuando vida baja
+            healthBar.color = Color.Lerp(fullHealthColor, lowHealthColor, t);
         }
 
         if (!isPlayer)
         {
             //Solo lanza el evento OnHit si NO esta en Chase ni Alert
-            if(fsm != null && fsm.currentState != EnemyState.Chase && fsm.currentState != EnemyState.Alert)
+            if (fsm != null && fsm.currentState != EnemyState.Chase && fsm.currentState != EnemyState.Alert)
             {
                 OnHit?.Invoke(transform.position);
             }
-            
+
             enemyRend.material = damagedMat; //feedback visual de impacto
             Invoke(nameof(ResetDamageMat), 0.1f);
         }
@@ -94,7 +119,7 @@ public class Health : MonoBehaviour
         }
     }
 
-    //Restaura el material original tras el feedback de da�o
+    //Restaura el material original tras el feedback de daño
     void ResetDamageMat()
     {
         if (isPlayer) return;
@@ -107,11 +132,18 @@ public class Health : MonoBehaviour
         currentHealth = 0;
         if (!isPlayer)
         {
-            OnDeath?.Invoke(); //invoca el evento antes de apagaer el objeto
-            gameObject.SetActive(false); //desactivar el enemigo (vuelve a la pool)
+            OnDeath?.Invoke();
 
+            // Spawnear VFX desde la pool
+            if (PoolManager.Instance != null && vfxPoolName != "")
+            {
+                GameObject vfx = PoolManager.Instance.Spawn(vfxPoolName, transform.position, Quaternion.identity);
+                // opcional: si el VFX tiene AutoDespawn, se desactivará solo
+            }
 
-            // Probabilidad de soltar munici�n
+            PoolManager.Instance.Despawn(poolName, gameObject);
+
+            // Probabilidad de drop
             if (dropPrefab != null && UnityEngine.Random.value <= percentChance)
             {
                 Instantiate(dropPrefab, transform.position, Quaternion.identity);
@@ -120,18 +152,43 @@ public class Health : MonoBehaviour
         else
         {
             //Jugador muere
-            if(GameManager.Instance != null)
+            if (GameManager.Instance != null)
             {
                 GameManager.Instance.GameOver();
             }
         }
-
-        
     }
 
-    //M�todo llamado autom�ticamente al activar el objeto
+    //Método llamado automáticamente al activar el objeto
     private void OnEnable()
     {
         ResetHealth(); //Restauramos la salud y materiales al reaparecer
+        isDamageable = true; // Aseguramos que el enemigo pueda recibir daño al reactivarse
+
+        Collider collider = GetComponent<Collider>(); // Obtener el collider
+        if (collider != null)
+        {
+            collider.enabled = true; // Asegurarnos de que el collider esté habilitado
+        }
+
+        if (fsm != null)
+        {
+            fsm.ResetState(); // Si tienes un estado FSM que reiniciar, hazlo aquí
+        }
+    }
+
+    //Método para desactivar el enemigo
+    public void DeactivateEnemy()
+    {
+        isDamageable = false; // No permitirá más daño cuando está desactivado
+        gameObject.SetActive(false); // Desactivamos el enemigo
+    }
+
+    //Método para reactivar el enemigo
+    public void ReactivateEnemy()
+    {
+        gameObject.SetActive(true); // Reactivamos el enemigo
+        ResetHealth(); // Restauramos la salud
+        isDamageable = true; // Permitimos que el enemigo reciba daño nuevamente
     }
 }

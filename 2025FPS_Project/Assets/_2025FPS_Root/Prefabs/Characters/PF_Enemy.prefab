@@ -488,6 +488,8 @@ MonoBehaviour:
   isPlayer: 0
   maxHealth: 100
   health: 0
+  lowHealthColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  fullHealthColor: {r: 0, g: 0, b: 0, a: 0}
   damagedMat: {fileID: 2100000, guid: 25e1f4d730f3b7a45892a0bc42adaa41, type: 2}
   healthBar: {fileID: 0}
   dropPrefab: {fileID: 7008232548757848766, guid: d005133193c30d748b452b749c213125, type: 3}

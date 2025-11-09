@@ -28,6 +28,11 @@ public class EnemyStateMachine : MonoBehaviour
         OnStateChanged?.Invoke(currentState);
     }
 
+    public void ResetState()
+    {
+        currentState = EnemyState.Patrol; // O cualquier estado inicial que desees
+        OnStateChanged?.Invoke(currentState); // Disparar el evento de cambio de estado
+    }
 
 
     #region Handlers públicos (Para eventos)
