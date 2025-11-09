@@ -48,9 +48,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45bd491a1351ddc468258d1eca0deec7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levitationHeight: 0.1
-  levitationSpeed: 0.2
-  levitationStopSpeed: 0.3
+  levitationHeight: 0.2
+  levitationSpeed: 1
+  levitationStopSpeed: 1
 --- !u!33 &3405517408721355539
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -508,9 +508,9 @@ MonoBehaviour:
   pool: {fileID: 0}
   childToShrink: {fileID: 1796109003998219446}
   waitTimeBeforeShoot: 1
-  shrinkDuration: 2
-  shrinkFactor: 0.9
-  restoreSpeed: 3
+  shrinkDuration: 1
+  shrinkFactor: 0.8
+  restoreSpeed: 5
   enemyData: {fileID: 11400000, guid: c2eb823233453c0459dd72b4a1ea3a48, type: 2}
 --- !u!1 &8097036499890365445
 GameObject:

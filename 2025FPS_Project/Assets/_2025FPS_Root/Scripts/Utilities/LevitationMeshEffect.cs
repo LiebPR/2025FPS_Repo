@@ -29,8 +29,8 @@ public class LevitationMeshEffect : MonoBehaviour
             // Incrementa el tiempo de oscilación
             oscillationTime += Time.deltaTime * levitationSpeed;
 
-            // La función PingPong oscila entre 0 y levitationHeight
-            currentHeightOffset = Mathf.PingPong(oscillationTime, levitationHeight);
+            // La función SmoothStep suaviza el valor, generando un efecto de "easy in" y "easy out"
+            currentHeightOffset = Mathf.SmoothStep(0f, levitationHeight, Mathf.PingPong(oscillationTime, 1f));
 
             // Aplica la oscilación solo en el eje Y
             transform.localPosition = new Vector3(originalLocalPosition.x, originalLocalPosition.y + currentHeightOffset, originalLocalPosition.z);

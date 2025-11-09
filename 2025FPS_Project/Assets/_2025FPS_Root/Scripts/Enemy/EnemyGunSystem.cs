@@ -41,7 +41,6 @@ public class EnemyGunSystem : MonoBehaviour
         enemyMovement = GetComponent<EnemyMovement>();
         pool = PoolManager.Instance; // Referencia al PoolManager de forma automática
         levitationEffect = GetComponentInChildren<LevitationMeshEffect>();
-        
 
         // Almacena el tamaño original del hijo
         if (childToShrink != null)
@@ -94,10 +93,10 @@ public class EnemyGunSystem : MonoBehaviour
         // Detener movimiento antes de disparar
         enemyMovement.StopMovement();
 
-        // Encoge el hijo suavemente
+        // Encoge el hijo suavemente con Easy In
         if (childToShrink != null)
         {
-            //VFX
+            // VFX
             if (!string.IsNullOrEmpty(chargeEffect) && pool.HasPool(chargeEffect))
             {
                 GameObject chargeVFX = pool.Spawn(chargeEffect, shootPoint.position, shootPoint.rotation);
@@ -112,9 +111,7 @@ public class EnemyGunSystem : MonoBehaviour
         // Disparo
         Shoot();
 
-        
-
-        // Restaura la escala del hijo rápidamente después de disparar
+        // Restaura la escala del hijo con Easy Out después de disparar
         if (childToShrink != null)
         {
             yield return StartCoroutine(SmoothRestore(childToShrink, restoreSpeed));
@@ -169,14 +166,14 @@ public class EnemyGunSystem : MonoBehaviour
 
     #region Smooth Scaling Logic
     /// <summary>
-    /// Realiza un encogimiento suave en el hijo especificado.
+    /// Realiza un encogimiento suave en el hijo especificado (Easy In).
     /// </summary>
     /// <param name="child">Transform del hijo a encoger</param>
     /// <param name="shrinkFactor">Factor de reducción de la escala</param>
     /// <param name="duration">Duración de la animación de encogimiento</param>
     IEnumerator SmoothShrink(Transform child, float shrinkFactor, float duration)
     {
-        // Realiza el encogimiento suave
+        // Realiza el encogimiento suave (Easy In)
         Vector3 originalScale = child.localScale;
         Vector3 targetScale = originalScale * shrinkFactor;
 
@@ -184,7 +181,9 @@ public class EnemyGunSystem : MonoBehaviour
 
         while (timeElapsed < duration)
         {
-            child.localScale = Vector3.Lerp(originalScale, targetScale, timeElapsed / duration);
+            // Utiliza SmoothStep para hacer un "easy in" (aceleración al principio)
+            float smoothStep = Mathf.SmoothStep(0f, 1f, timeElapsed / duration);
+            child.localScale = Vector3.Lerp(originalScale, targetScale, smoothStep);
             timeElapsed += Time.deltaTime;
             yield return null;
         }
@@ -194,7 +193,7 @@ public class EnemyGunSystem : MonoBehaviour
     }
 
     /// <summary>
-    /// Restaura suavemente la escala del hijo a su tamaño original.
+    /// Restaura suavemente la escala del hijo a su tamaño original (Easy Out).
     /// </summary>
     /// <param name="child">Transform del hijo a restaurar</param>
     /// <param name="speed">Velocidad de restauración de la escala</param>
@@ -203,6 +202,7 @@ public class EnemyGunSystem : MonoBehaviour
         // Utiliza el tamaño original guardado previamente
         while (child.localScale != originalScale)
         {
+            // Utiliza MoveTowards para hacer un "easy out" (desaceleración al final)
             child.localScale = Vector3.MoveTowards(child.localScale, originalScale, speed * Time.deltaTime);
             yield return null;
         }
