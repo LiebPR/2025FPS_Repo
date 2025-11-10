@@ -55,11 +55,11 @@ PrefabInstance:
     - target: {fileID: -6821315975633821789, guid: 139cfdb952f52dc43951262d60559132, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 1dd31cb41e5cf924aaa164988fb64ffc, type: 2}
+      objectReference: {fileID: 2100000, guid: fa6039dff87792a4f95b54776bba5ff1, type: 2}
     - target: {fileID: -4791300549530949414, guid: 139cfdb952f52dc43951262d60559132, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 1dd31cb41e5cf924aaa164988fb64ffc, type: 2}
+      objectReference: {fileID: 2100000, guid: fa6039dff87792a4f95b54776bba5ff1, type: 2}
     - target: {fileID: -241587437493983680, guid: 139cfdb952f52dc43951262d60559132, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
@@ -75,7 +75,7 @@ PrefabInstance:
     - target: {fileID: -74190570699924520, guid: 139cfdb952f52dc43951262d60559132, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 1dd31cb41e5cf924aaa164988fb64ffc, type: 2}
+      objectReference: {fileID: 2100000, guid: fa6039dff87792a4f95b54776bba5ff1, type: 2}
     - target: {fileID: 919132149155446097, guid: 139cfdb952f52dc43951262d60559132, type: 3}
       propertyPath: m_Name
       value: SM_WallHigh01
