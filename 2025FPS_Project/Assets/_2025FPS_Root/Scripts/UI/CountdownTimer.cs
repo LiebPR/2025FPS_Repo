@@ -55,7 +55,10 @@ public class CountdownTimer : MonoBehaviour
         currentTime -= Time.deltaTime;
 
         if (currentTime <= 10f && !isFlashing)
+        {
             isFlashing = true;
+        }
+            
 
         if (isFlashing)
             FlashText();

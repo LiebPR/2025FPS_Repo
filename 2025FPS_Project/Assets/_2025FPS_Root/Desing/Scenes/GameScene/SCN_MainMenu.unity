@@ -949,7 +949,7 @@ CanvasGroup:
   m_GameObject: {fileID: 1024003000}
   m_Enabled: 1
   m_Alpha: 0
-  m_Interactable: 1
+  m_Interactable: 0
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
 --- !u!114 &1024003006
@@ -1433,9 +1433,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 3248107615414988849, guid: e15399188ee414e49a22334754772eab, type: 3}
-        m_TargetAssemblyTypeName: SceneManagerSimple, Assembly-CSharp
-        m_MethodName: QuitGame
+      - m_Target: {fileID: 562815512}
+        m_TargetAssemblyTypeName: MainMenuMusic, Assembly-CSharp
+        m_MethodName: OnExitButtonPressed
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

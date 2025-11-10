@@ -66,24 +66,33 @@ public class PoolManager : MonoBehaviour
         var config = poolData.pools.Find(poolDictionary => poolDictionary.poolName == poolName); //obtiene la configuración de la pool
         var objects = poolDictionary[poolName]; //cola de objetos
 
-        GameObject obj;
+        GameObject obj = null;
 
         if (objects.Count == 0 && config.canExpand)
         {
-            //Instancia dinámica si se permite expandir 
+            // Instanciación dinámica si se permite expandir 
             obj = Instantiate(config.prefab, pos, rot);
         }
         else if (objects.Count > 0)
         {
-            obj = objects.Dequeue(); //saca el objeto de la cola
-            obj.transform.SetPositionAndRotation(pos, rot); //reposiciona
-        }
-        else
-        {
-            return null;
+            obj = objects.Dequeue(); // Saca el objeto de la cola
+
+            if (obj != null) // Verifica si el objeto es válido antes de intentar usarlo
+            {
+                obj.transform.SetPositionAndRotation(pos, rot); // Reposiciona
+            }
+            else
+            {
+                // Si el objeto ya ha sido destruido, simplemente instanciamos uno nuevo
+                obj = Instantiate(config.prefab, pos, rot);
+            }
         }
 
-        obj.SetActive(true); //activa el objeto
+        if (obj != null)
+        {
+            obj.SetActive(true); // Activa el objeto
+        }
+
         return obj;
     }
 
@@ -92,12 +101,31 @@ public class PoolManager : MonoBehaviour
     {
         if (!poolDictionary.ContainsKey(poolName))
         {
-            Destroy(obj);
+            Destroy(obj); // Si la pool no existe, destruimos el objeto
             return;
         }
 
-        obj.SetActive(false); //desactiva el objeto
-        poolDictionary[poolName].Enqueue(obj); //lo devuelve a la cola
+        if (obj == null) // Verifica que el objeto no sea nulo antes de procesarlo
+        {
+            return;
+        }
+
+        if (obj.TryGetComponent<ParticleSystem>(out ParticleSystem ps))
+        {
+            // Llamamos al método ResetMuzzleFlash solo si el objeto es de tipo GunSystem
+            GunSystem gunSystem = FindAnyObjectByType<GunSystem>();
+            if (gunSystem != null)
+            {
+                gunSystem.ResetMuzzleFlash(obj);  // Aquí se invoca el método correctamente
+            }
+        }
+
+        obj.SetActive(false); // Desactiva el objeto
+
+        if (!obj.Equals(null)) // Verifica que el objeto no haya sido destruido antes de devolverlo al pool
+        {
+            poolDictionary[poolName].Enqueue(obj); // Lo devuelve a la cola
+        }
     }
     #endregion
 
@@ -112,7 +140,10 @@ public class PoolManager : MonoBehaviour
         {
             foreach (var obj in kvp.Value)
             {
-                if (obj != null) Destroy(obj);
+                if (obj != null)
+                {
+                    Destroy(obj); // Solo destruye los objetos si no son null
+                }
             }
         }
 

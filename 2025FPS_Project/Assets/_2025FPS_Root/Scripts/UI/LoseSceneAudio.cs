@@ -2,21 +2,19 @@ using UnityEngine;
 
 public class LoseSceneAudio : MonoBehaviour
 {
-    void Start()
-    {
-        // Reproducir música de fondo del menú
-        if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayLoop("LoseMenuBGM");
-    }
 
     public void OnReplayButtonPresed()
     {
+        AudioManager.Instance.Play("StartPressButton");
         // Detener la música de fondo del menú y cargar la escena de juego
+        AudioManager.Instance.StopLoop("LoseMenuBGM");
         SceneManagerSimple.Instance.LoadScene("SCN_AlejandroTask");
     }
 
     public void OnMenuButtonPresed()
     {
+        AudioManager.Instance.Play("StartPressButton");
+        AudioManager.Instance.StopLoop("LoseMenuBGM");
         SceneManagerSimple.Instance.LoadScene("SCN_MainMenu");
     }
 }

@@ -121,7 +121,7 @@ public class InjectionDoorController : MonoBehaviour
 
         //Al terminar aseguramos que la luz quede apagada
         alarmLight.enabled = false;
-        AudioManager.Instance.StopLoop();
+        AudioManager.Instance.StopLoop("Alarma");
 
     }
     #endregion

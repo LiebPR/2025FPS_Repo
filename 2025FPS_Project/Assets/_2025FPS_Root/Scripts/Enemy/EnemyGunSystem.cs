@@ -95,7 +95,7 @@ public class EnemyGunSystem : MonoBehaviour
 
         // Detener movimiento antes de disparar
         enemyMovement.StopMovement();
-
+        AudioManager.Instance.Play("EnemyAttack");
         // Encoge el hijo suavemente con Easy In
         if (childToShrink != null)
         {
