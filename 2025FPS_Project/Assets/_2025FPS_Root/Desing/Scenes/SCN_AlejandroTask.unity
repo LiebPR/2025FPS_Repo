@@ -569,7 +569,7 @@ Transform:
   m_GameObject: {fileID: 37008567}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -3.06, y: 2.03, z: 0}
+  m_LocalPosition: {x: -3.06, y: 2, z: 0}
   m_LocalScale: {x: 4.34, y: 4.17, z: 0.54}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -586,7 +586,7 @@ NavMeshObstacle:
   serializedVersion: 3
   m_Shape: 1
   m_Extents: {x: 0.5, y: 0.5, z: 1.235}
-  m_MoveThreshold: 1.82
+  m_MoveThreshold: 2
   m_Carve: 1
   m_CarveOnlyStationary: 1
   m_Center: {x: 0, y: 0, z: 0}
@@ -603,7 +603,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36513cecdeb364c4f917d3141ac075bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  openHeight: 3
+  openHeight: 5
   openDuration: 60
   alarmLight: {fileID: 1600356747}
   blinkInterval: 0.8
@@ -1373,7 +1373,7 @@ GameObject:
   - component: {fileID: 299391300}
   - component: {fileID: 299391304}
   - component: {fileID: 299391303}
-  m_Layer: 8
+  m_Layer: 10
   m_Name: Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2466,6 +2466,7 @@ GameObject:
   m_Component:
   - component: {fileID: 706125770}
   - component: {fileID: 706125771}
+  - component: {fileID: 706125772}
   m_Layer: 0
   m_Name: SpawnPoint1
   m_TagString: Untagged
@@ -2509,6 +2510,19 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 21.113117, y: 5.240835, z: 17.441202}
   m_Center: {x: 0.8008423, y: 2.1204176, z: 12.338729}
+--- !u!114 &706125772
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 706125769}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f150178f119b0345919bc26d84f02a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawner: {fileID: 871477531}
 --- !u!1 &727308560
 GameObject:
   m_ObjectHideFlags: 0
@@ -3213,8 +3227,7 @@ MonoBehaviour:
   maxEnemies: 5
   spawnDelayInitial: 0.5
   spawnDelayRespawn: 3
-  spawnZones:
-  - {fileID: 706125771}
+  spawnZone: {fileID: 706125771}
 --- !u!4 &871477532
 Transform:
   m_ObjectHideFlags: 0

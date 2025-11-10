@@ -52,8 +52,16 @@ public class KeypadPanel : MonoBehaviour
     IEnumerator Feedback(bool success)
     {
         panelRenderer.material.color = success ? Color.green : Color.red;
-        tickCorrect.SetActive(success);
-        tickWrong.SetActive(!success);
+        if (success)
+        {
+            tickCorrect.SetActive(true);
+            AudioManager.Instance.Play("CorrectAnswer");
+        }
+        if (!success)
+        {
+            tickWrong.SetActive(false);
+            AudioManager.Instance.Play("WrongAnswer");
+        }
 
         if(success && linkedDoor != null)
             linkedDoor.OpenDoor();

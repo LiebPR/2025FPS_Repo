@@ -169,10 +169,15 @@ public class Health : MonoBehaviour
 
             PoolManager.Instance.Despawn(poolName, gameObject);
 
-            // Probabilidad de drop
             if (dropPrefab != null && UnityEngine.Random.value <= percentChance)
             {
-                Instantiate(dropPrefab, transform.position, Quaternion.identity);
+                int amount = UnityEngine.Random.Range(1, 5); // unidades de munición
+                GameObject drop = PoolManager.Instance.Spawn("Ammo", transform.position, Quaternion.identity);
+
+                if (drop.TryGetComponent<AmmoPickUp>(out AmmoPickUp ammo))
+                {
+                    ammo.SetAmmoAmount(amount);
+                }
             }
         }
         else

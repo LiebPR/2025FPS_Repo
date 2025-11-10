@@ -28,7 +28,7 @@ MonoBehaviour:
   - id: LowHealth
     clip: {fileID: 8300000, guid: ebb88a5be11f3c44da2a5d6370cc0c05, type: 3}
     group: 2
-    defaultVolume: 1
+    defaultVolume: 0.8
   - id: AmmoPickUpTrue
     clip: {fileID: 8300000, guid: 24d4c925cb767c4498ff885f64b31bc8, type: 3}
     group: 2
@@ -69,3 +69,23 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: f440446063ff2074a9b0b8f3c3115f5d, type: 3}
     group: 1
     defaultVolume: 1
+  - id: UnClickButton
+    clip: {fileID: 8300000, guid: 709ba6afed081214d811b19c85ea4963, type: 3}
+    group: 2
+    defaultVolume: 1
+  - id: ClickButton
+    clip: {fileID: 8300000, guid: 21d38104c71539147a52ca12e9d9fe9a, type: 3}
+    group: 2
+    defaultVolume: 1
+  - id: ButtonBeep
+    clip: {fileID: 8300000, guid: 4d66b00aa5870da45a490ec42b91b55a, type: 3}
+    group: 2
+    defaultVolume: 0.7
+  - id: CorrectAnswer
+    clip: {fileID: 8300000, guid: c2dc0071fbf1f1c4b9da336325c2642a, type: 3}
+    group: 2
+    defaultVolume: 0.7
+  - id: WrongAnswer
+    clip: {fileID: 8300000, guid: ce359e1fefdb09e46a176a3bc017b599, type: 3}
+    group: 2
+    defaultVolume: 0.7

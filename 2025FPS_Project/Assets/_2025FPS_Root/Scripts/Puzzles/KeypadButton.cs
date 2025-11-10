@@ -42,6 +42,7 @@ public class KeypadButton : MonoBehaviour, IInteractable
         // Activar animación de presión
         if (animButton != null && !string.IsNullOrEmpty(pressDownTrigger))
             animButton.SetTrigger(pressDownTrigger);
+        AudioManager.Instance.Play("ButtonBeep");
     }
 
     //Al soltar el boton
