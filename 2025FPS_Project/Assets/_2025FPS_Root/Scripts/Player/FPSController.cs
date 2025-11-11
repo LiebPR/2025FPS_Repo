@@ -52,6 +52,16 @@ public class FPSController : MonoBehaviour
     bool isSliding;
     Coroutine slideCoroutine;
 
+    [Header("Footstep Audio")]
+    [SerializeField] AudioSource walkAudioSource; // AudioSource para el sonido de caminar
+    [SerializeField] AudioSource slideAudioSource;
+    [SerializeField] AudioClip walkSound; // Clip de sonido para caminar
+    [SerializeField] AudioClip sprintSound; // Clip de sonido para correr
+    [SerializeField] AudioClip slideStartSound;
+    [SerializeField] AudioClip slideLoopSound;
+    [SerializeField] AudioClip slideEndSound;
+    bool isPlayingFootstepSound = false;
+
     //Input Variables
     Vector2 moveInput;
     Vector2 lookInput;
@@ -115,6 +125,38 @@ public class FPSController : MonoBehaviour
     
     void Update()
     {
+        // Comprobar si estamos en movimiento
+        if (HasMovementInput() && isGrounded && !isSliding)
+        {
+
+            if (!isPlayingFootstepSound)
+            {
+                PlayFootstepSound();
+            }
+
+            // Si el jugador está corriendo, aumentar el pitch
+            if (isSprinting)
+            {
+                walkAudioSource.pitch = Mathf.Lerp(walkAudioSource.pitch, 1.7f, Time.deltaTime * 5f); // Aumentar el pitch
+            }
+            else if (isCrouching)
+            {
+                walkAudioSource.pitch = Mathf.Lerp(walkAudioSource.pitch, 0.9f, Time.deltaTime * 5f); // Pitch normal
+            }
+            else
+            {
+                walkAudioSource.pitch = Mathf.Lerp(walkAudioSource.pitch, 1.5f, Time.deltaTime * 5f); // Pitch normal
+            }
+        }
+        else
+        {
+            // Detener el sonido si no hay movimiento
+            if (isPlayingFootstepSound)
+            {
+                StopFootstepSound();
+            }
+        }
+
         //Groundcheck
         isGrounded = Physics.CheckSphere(groundCheck.transform.position, groundCheckRadius, groundLayer);
         //Debug ray: visible only in Scene
@@ -227,11 +269,18 @@ public class FPSController : MonoBehaviour
     {
         isSliding = true;
 
+        slideAudioSource.clip = slideStartSound;
+        slideAudioSource.Play();
+
         Vector3 slideDir = new Vector3(moveInput.x, 0, moveInput.y).normalized;
         if (slideDir.magnitude < 0.1f)
             slideDir = transform.forward; //fallback a la dirección de la cámara
 
         slideDir = transform.TransformDirection(slideDir);
+
+        slideAudioSource.clip = slideLoopSound;
+        slideAudioSource.loop = true;
+        slideAudioSource.Play();
 
         float currentForce = slideForce;
         float startTime = Time.time;
@@ -243,6 +292,10 @@ public class FPSController : MonoBehaviour
             currentForce = Mathf.Lerp(currentForce, 0, Time.deltaTime * slideFriction);
             yield return null;
         }
+
+        // Detener el sonido del slide
+        slideAudioSource.Stop();
+        slideAudioSource.loop = false;
 
         isSliding = false;
     }
@@ -288,7 +341,7 @@ public class FPSController : MonoBehaviour
         anim.SetBool("isCrouching", isCrouching);
 
         //Si el jugador está sprintando, en el suelo y presiona crouch desliza.
-        if(isPressed && isSprinting && isGrounded && !isSliding)
+        if (isPressed && isSprinting && isGrounded && !isSliding)
         {
             StartSlide();
         }
@@ -301,6 +354,21 @@ public class FPSController : MonoBehaviour
 
         // Evitar sprint si estás agachado
         if (isCrouching) isSprinting = false;
+    }
+    #endregion
+
+    #region Audio
+    void PlayFootstepSound()
+    {
+        walkAudioSource.clip = isSprinting ? sprintSound : walkSound; // Cambiar el sonido según si se está sprintando
+        walkAudioSource.Play();
+        isPlayingFootstepSound = true;
+    }
+
+    void StopFootstepSound()
+    {
+        walkAudioSource.Stop();
+        isPlayingFootstepSound = false;
     }
     #endregion
 }

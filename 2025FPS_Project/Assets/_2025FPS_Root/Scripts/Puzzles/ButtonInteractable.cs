@@ -35,6 +35,7 @@ public class ButtonInteractable : MonoBehaviour, IInteractable
         {
             if (!string.IsNullOrEmpty(pressDownTrigger))
                 animButton.SetTrigger(pressDownTrigger);
+            AudioManager.Instance.Play("ClickButton");
         }
 
         // Cambiar el estado de la puerta
@@ -46,6 +47,8 @@ public class ButtonInteractable : MonoBehaviour, IInteractable
     {
         if (animButton != null && !string.IsNullOrEmpty(pressUpTrigger))
             animButton.SetTrigger(pressUpTrigger);
+
+        AudioManager.Instance.Play("UnClickButton");
     }
 
     #region Highlight

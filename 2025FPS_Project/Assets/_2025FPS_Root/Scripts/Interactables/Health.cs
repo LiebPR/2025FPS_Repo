@@ -45,6 +45,7 @@ public class Health : MonoBehaviour
 
     // Flag para gestionar si el enemigo puede recibir daño
     bool isDamageable = true;
+    bool isLowHealthSoundPlaying;
 
     private void Awake()
     {
@@ -105,6 +106,18 @@ public class Health : MonoBehaviour
             float t = 1f - healthPercent; // ahora t = 0 cuando vida llena, t = 1 cuando vida baja
             healthBar.color = Color.Lerp(fullHealthColor, lowHealthColor, t);
         }
+        if(currentHealth <= maxHealth * 0.2f && isPlayer && !isLowHealthSoundPlaying)
+        {
+            //Reproducir el SFX de baja salud
+            AudioManager.Instance.PlayLoop("LowHealth");
+            isLowHealthSoundPlaying = true;
+        }
+        else if(currentHealth > maxHealth * 0.2f && isPlayer && isLowHealthSoundPlaying)
+        {
+            //Detener audio
+            AudioManager.Instance.StopLoop("LowHealth");
+            isLowHealthSoundPlaying = false;
+        }
 
         if (!isPlayer)
         {
@@ -156,10 +169,15 @@ public class Health : MonoBehaviour
 
             PoolManager.Instance.Despawn(poolName, gameObject);
 
-            // Probabilidad de drop
             if (dropPrefab != null && UnityEngine.Random.value <= percentChance)
             {
-                Instantiate(dropPrefab, transform.position, Quaternion.identity);
+                int amount = UnityEngine.Random.Range(1, 5); // unidades de munición
+                GameObject drop = PoolManager.Instance.Spawn("Ammo", transform.position, Quaternion.identity);
+
+                if (drop.TryGetComponent<AmmoPickUp>(out AmmoPickUp ammo))
+                {
+                    ammo.SetAmmoAmount(amount);
+                }
             }
         }
         else

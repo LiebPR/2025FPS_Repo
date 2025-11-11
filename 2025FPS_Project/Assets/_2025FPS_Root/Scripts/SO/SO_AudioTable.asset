@@ -13,10 +13,22 @@ MonoBehaviour:
   m_Name: SO_AudioTable
   m_EditorClassIdentifier: 
   audios:
-  - id: Shoot
-    clip: {fileID: 8300000, guid: 96b8c763ffc2bf44a8750e6756f1c342, type: 3}
+  - id: PlayerShoot
+    clip: {fileID: 8300000, guid: 895cbba67e0653b42a742359d44ea09b, type: 3}
+    group: 2
+    defaultVolume: 0.4
+  - id: ShootError
+    clip: {fileID: 8300000, guid: b30ba4f98ece8c04893411f7d17eec03, type: 3}
+    group: 2
+    defaultVolume: 0.7
+  - id: EnemyAttack
+    clip: {fileID: 8300000, guid: b1490af6e9009d04aaeb48fa1ec5dd88, type: 3}
     group: 2
     defaultVolume: 0.3
+  - id: LowHealth
+    clip: {fileID: 8300000, guid: ebb88a5be11f3c44da2a5d6370cc0c05, type: 3}
+    group: 2
+    defaultVolume: 0.8
   - id: AmmoPickUpTrue
     clip: {fileID: 8300000, guid: 24d4c925cb767c4498ff885f64b31bc8, type: 3}
     group: 2
@@ -30,10 +42,54 @@ MonoBehaviour:
     group: 2
     defaultVolume: 0.5
   - id: Alarma
-    clip: {fileID: 8300000, guid: 77035cb9684a9364fb7506b22d79b6ff, type: 3}
+    clip: {fileID: 8300000, guid: 4c72714cb5563cf4eadaf2ddb98ecf65, type: 3}
     group: 2
-    defaultVolume: 0.8
+    defaultVolume: 0.5
   - id: MainMenuBGM
     clip: {fileID: 8300000, guid: 4ffc0de07cda3af4c90c7f85972f476d, type: 3}
     group: 0
     defaultVolume: 1
+  - id: LoseMenuBGM
+    clip: {fileID: 8300000, guid: 7e655b22dceb73148b8299b75d5bdc38, type: 3}
+    group: 0
+    defaultVolume: 0.2
+  - id: GamePlayBGM
+    clip: {fileID: 8300000, guid: 268656af062dea641a233d2388dcded9, type: 3}
+    group: 0
+    defaultVolume: 0.2
+  - id: ExitPressButton
+    clip: {fileID: 8300000, guid: 224a08d3c6f2d534bad1a2453438f3a9, type: 3}
+    group: 1
+    defaultVolume: 1
+  - id: StartPressButton
+    clip: {fileID: 8300000, guid: 829edc7f50f17f740a49be331387bf4a, type: 3}
+    group: 1
+    defaultVolume: 1
+  - id: NavePressButton
+    clip: {fileID: 8300000, guid: f440446063ff2074a9b0b8f3c3115f5d, type: 3}
+    group: 1
+    defaultVolume: 1
+  - id: UnClickButton
+    clip: {fileID: 8300000, guid: 709ba6afed081214d811b19c85ea4963, type: 3}
+    group: 2
+    defaultVolume: 1
+  - id: ClickButton
+    clip: {fileID: 8300000, guid: 21d38104c71539147a52ca12e9d9fe9a, type: 3}
+    group: 2
+    defaultVolume: 1
+  - id: ButtonBeep
+    clip: {fileID: 8300000, guid: 4d66b00aa5870da45a490ec42b91b55a, type: 3}
+    group: 2
+    defaultVolume: 0.7
+  - id: CorrectAnswer
+    clip: {fileID: 8300000, guid: c2dc0071fbf1f1c4b9da336325c2642a, type: 3}
+    group: 2
+    defaultVolume: 0.7
+  - id: WrongAnswer
+    clip: {fileID: 8300000, guid: ce359e1fefdb09e46a176a3bc017b599, type: 3}
+    group: 2
+    defaultVolume: 0.7
+  - id: BigElevatorDoor
+    clip: {fileID: 8300000, guid: a81112991246bbb4f8358aa3f4e5d8f9, type: 3}
+    group: 2
+    defaultVolume: 0.5

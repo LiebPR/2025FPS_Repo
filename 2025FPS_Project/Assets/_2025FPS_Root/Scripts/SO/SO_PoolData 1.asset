@@ -28,8 +28,16 @@ MonoBehaviour:
   - poolName: EnemyDeathVFX
     prefab: {fileID: 3537121407974028455, guid: 5e6656ee123143f4db022b7c7a31a60a, type: 3}
     initialSize: 5
-    canExpand: 1
+    canExpand: 0
   - poolName: ChargeEffect
     prefab: {fileID: 5365793910920681531, guid: 5b87fd1f3cf8cf441b45b8f98b2c1b33, type: 3}
+    initialSize: 20
+    canExpand: 1
+  - poolName: LaserPool
+    prefab: {fileID: 4428982754757914020, guid: 58bd0278c8d162f4b9a5e17876e0db96, type: 3}
+    initialSize: 20
+    canExpand: 1
+  - poolName: Ammo
+    prefab: {fileID: 7008232548757848766, guid: d005133193c30d748b452b749c213125, type: 3}
     initialSize: 20
     canExpand: 1

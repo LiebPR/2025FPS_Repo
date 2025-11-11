@@ -54,19 +54,22 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        AudioManager.Instance.StopAllSFXExceptBGM();
         SetState(GameState.GameOver);
         OnGameOver?.Invoke();
-        SceneManagerSimple.Instance.LoadScene("SCN_Lose");
+        AudioManager.Instance.StopAllSFXExceptBGM(); //Parar los SFX
+        AudioManager.Instance.StopLoop("GamePlayBGM"); //Apagar el BGM de GamePlay
+        AudioManager.Instance.PlayLoop("LoseMenuBGM"); //Activar la musica de LoseScene
+        SceneManagerSimple.Instance.LoadScene("SCN_LoseMenu");
     }
 
     public void GameWin()
     {
         if (currentState != GameState.Playing) return;
 
+
         SetState(GameState.Win);
         OnGameWin?.Invoke();
-        SceneManagerSimple.Instance.LoadScene("SCN_Win");
+        SceneManagerSimple.Instance.LoadScene("SCN_WinMenu");
     }
     #endregion
 
@@ -74,6 +77,8 @@ public class GameManager : MonoBehaviour
     public void StartGame()
     {
         SetState(GameState.Playing);
+        AudioManager.Instance.StopLoop("MainMenuBGM");
+        AudioManager.Instance.PlayLoop("GamePlayBGM");
     }
 
     public void RestartGame()

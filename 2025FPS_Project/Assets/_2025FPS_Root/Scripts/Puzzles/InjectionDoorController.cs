@@ -54,7 +54,7 @@ public class InjectionDoorController : MonoBehaviour
     IEnumerator OpenDoorAndCountdown()
     {
         isOpening = true;
-
+        AudioManager.Instance.Play("BigElevatorDoor");
         //Activar alarma y corrutina de parpadeo
         alarmActive = true;
         if (alarmLight != null) alarmLight.color = Color.red;
@@ -121,7 +121,7 @@ public class InjectionDoorController : MonoBehaviour
 
         //Al terminar aseguramos que la luz quede apagada
         alarmLight.enabled = false;
-        AudioManager.Instance.StopLoop();
+        AudioManager.Instance.StopLoop("Alarma");
 
     }
     #endregion

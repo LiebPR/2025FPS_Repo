@@ -9,10 +9,10 @@ using UnityEngine.UI;
 public class CountdownTimer : MonoBehaviour
 {
     #region General Variables
-    [SerializeField] TextMeshProUGUI timerText;     // Referencia al TMPRO de la UI
-    [SerializeField] Image progressBar;             // Imagen UI con Fill Amount
-    [SerializeField] int startMinutes = 10;         // Minutos iniciales (ej: 10 -> 10:00)
-    [SerializeField] bool startOnAwake = true;      // Arranca automáticamente al iniciar
+    [SerializeField] TextMeshProUGUI timerText; //referencia al TMPRO de la UI
+    [SerializeField] Image progressBar; //imagen UI con Fill Amount
+    [SerializeField] int startMinutes = 10; //minutos iniciales (ej: 10 -> 10:00)
+    [SerializeField] bool startOnAwake = true; //arranca automáticamente al iniciar
     #endregion
 
     #region Variables internas
@@ -23,7 +23,7 @@ public class CountdownTimer : MonoBehaviour
     bool isGameOverTriggered;
     Color originalColor;
     float flashSpeed = 2f;
-    bool isOxygenBeingConsumed; // Nueva variable que indica si el oxígeno está siendo consumido
+    bool isOxygenBeingConsumed;
     #endregion
 
     #region Getter
@@ -50,12 +50,15 @@ public class CountdownTimer : MonoBehaviour
 
     void Update()
     {
-        if (!isRunning || isGameOverTriggered) return; // No avanza si el oxígeno está siendo consumido
+        if (!isRunning || isGameOverTriggered) return; //no avanza si el oxígeno está siendo consumido
 
         currentTime -= Time.deltaTime;
 
         if (currentTime <= 10f && !isFlashing)
+        {
             isFlashing = true;
+        }
+            
 
         if (isFlashing)
             FlashText();
@@ -137,7 +140,7 @@ public class CountdownTimer : MonoBehaviour
         float normalized = Mathf.Clamp01(currentTime / totalTime);
         float percentage = normalized * 100f;
 
-        // NUEVO: Parpadeo solo si está debajo del 10%
+        //Parpadeo solo si está debajo del 10%
         if (percentage <= 10f)
         {
             if (!isFlashing)

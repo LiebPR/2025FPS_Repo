@@ -73,7 +73,7 @@ public class OxygenPickUp : MonoBehaviour, IInteractable
             audioSource.loop = true;
             if (!audioSource.isPlaying)
                 audioSource.Play();
-            audioSource.volume = 1f;
+            audioSource.volume = 0.5f;
         }
     }
 
@@ -149,7 +149,7 @@ public class OxygenPickUp : MonoBehaviour, IInteractable
             if (audioSource.volume <= 0.01f)
             {
                 audioSource.Stop();
-                audioSource.volume = 1f; // Reset para el próximo uso
+                audioSource.volume = 0.5f; // Reset para el próximo uso
                 isFadingOut = false;
             }
         }

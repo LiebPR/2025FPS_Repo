@@ -31,6 +31,7 @@ public class KeypadButtonDelete : MonoBehaviour, IInteractable
 
         if (animButton != null && !string.IsNullOrEmpty(pressDownTrigger))
             animButton.SetTrigger(pressDownTrigger);
+        AudioManager.Instance.Play("ButtonBeep");
     }
 
     public void OnRelease()

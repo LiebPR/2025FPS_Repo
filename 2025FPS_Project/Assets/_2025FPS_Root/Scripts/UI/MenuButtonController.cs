@@ -50,6 +50,7 @@ public class MenuButtonController : MonoBehaviour, IPointerDownHandler, IPointer
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        AudioManager.Instance.Play("NavePressButton");
         if (!isButtonPressedOnce)
         {
             isButtonPressedOnce = true;
@@ -83,6 +84,8 @@ public class MenuButtonController : MonoBehaviour, IPointerDownHandler, IPointer
 
         startButtonCanvasGroup.alpha = 1f;
         exitButtonCanvasGroup.alpha = 1f;
+        startButtonCanvasGroup.interactable = true;
+        exitButtonCanvasGroup.interactable = true;
     }
 
     private IEnumerator FadeOutButtons()
@@ -101,5 +104,7 @@ public class MenuButtonController : MonoBehaviour, IPointerDownHandler, IPointer
 
         startButtonCanvasGroup.alpha = 0f;
         exitButtonCanvasGroup.alpha = 0f;
+        startButtonCanvasGroup.interactable = false;
+        exitButtonCanvasGroup.interactable = false;
     }
 }
