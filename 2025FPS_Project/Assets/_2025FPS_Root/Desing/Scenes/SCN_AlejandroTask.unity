@@ -603,10 +603,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36513cecdeb364c4f917d3141ac075bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  openHeight: 5
+  openHeight: 3
   openDuration: 60
   alarmLight: {fileID: 1600356747}
-  blinkInterval: 0.8
+  blinkInterval: 1.6
   countdownText: {fileID: 1221859802}
 --- !u!1 &41610660
 GameObject:

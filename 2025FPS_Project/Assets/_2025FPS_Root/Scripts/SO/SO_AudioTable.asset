@@ -89,3 +89,7 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: ce359e1fefdb09e46a176a3bc017b599, type: 3}
     group: 2
     defaultVolume: 0.7
+  - id: BigElevatorDoor
+    clip: {fileID: 8300000, guid: a81112991246bbb4f8358aa3f4e5d8f9, type: 3}
+    group: 2
+    defaultVolume: 0.5
