@@ -56,6 +56,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: SM_Bateria
       objectReference: {fileID: 0}
+    - target: {fileID: 1474109147239740850, guid: 6d903d8fd32cd524a93c0a12b2802a7a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 004558131c57c1b4e9ece1ed9ca4f57e, type: 2}
+    - target: {fileID: 5474686928306483191, guid: 6d903d8fd32cd524a93c0a12b2802a7a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: af2c66e9ce2255c4fa994b459bc4a703, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
