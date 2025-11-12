@@ -1,34 +1,19 @@
 using UnityEngine;
 
-/// <summary>
-/// DoorSystem: Controla la puerta elevadora mediante movimiento vertical.
-/// </summary>
 public class DoorSystem : MonoBehaviour
 {
     #region General Variables
     [SerializeField] bool isOpen = false; // Estado actual de la puerta
-    [SerializeField] float openHeight = 3f; // Altura a la que se abre la puerta
-    [SerializeField] float moveSpeed = 2f; // Velocidad de movimiento
+    [SerializeField] float moveSpeed = 2f; // Velocidad de movimiento (si aún quieres animaciones suaves con velocidad controlable)
     #endregion
 
-    #region Private Variables
-    Vector3 closedPosition;
-    Vector3 openPosition;
+    #region References
+    Animator doorAnimator;  // Referencia al Animator de la puerta
     #endregion
 
     private void Awake()
     {
-        closedPosition = transform.position;
-        openPosition = closedPosition + Vector3.up * openHeight;
-    }
-
-    private void Update()
-    {
-        // Determina la posición objetivo según el estado
-        Vector3 targetPosition = isOpen ? openPosition : closedPosition;
-        
-            // Mueve la puerta suavemente hacia la posición objetivo
-            transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
+        doorAnimator = GetComponent<Animator>();  // Obtener el Animator
     }
 
     #region Public Methods
@@ -36,23 +21,29 @@ public class DoorSystem : MonoBehaviour
     {
         if (isOpen) return;
         isOpen = true;
-
         AudioManager.Instance.Play("PuertaAbrir");
+        // Resetear el trigger antes de activar el nuevo
+        doorAnimator.SetTrigger("PressUp");
+
+        
     }
 
     public void CloseDoor()
     {
         if (!isOpen) return;
         isOpen = false;
-
         AudioManager.Instance.Play("PuertaCerrar");
+        // Resetear el trigger antes de activar el nuevo
+        doorAnimator.SetTrigger("PressDown");
+
+        
     }
 
     public void ToggleDoor()
     {
-        if(isOpen)
+        if (isOpen)
             CloseDoor();
-        else 
+        else
             OpenDoor();
     }
     #endregion
