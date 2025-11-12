@@ -1,6 +1,7 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using System;
 
 /// <summary>
 /// InjectionDoorController: Controla la apertura de la puerta (el propio GameObject),
@@ -30,6 +31,7 @@ public class InjectionDoorController : MonoBehaviour
     public bool IsAlarmActive => alarmActive;
     #endregion
 
+
     #region API
     //El contador mostrará el tiempo restante en formato mm:ss y la alarma parpadeará durante todo el proceso
     public void OpenDoor()
@@ -54,6 +56,8 @@ public class InjectionDoorController : MonoBehaviour
     IEnumerator OpenDoorAndCountdown()
     {
         isOpening = true;
+
+
         AudioManager.Instance.Play("BigElevatorDoor");
         //Activar alarma y corrutina de parpadeo
         alarmActive = true;
@@ -86,9 +90,6 @@ public class InjectionDoorController : MonoBehaviour
 
         //Asegurar posición final exacta
         transform.position = endPos;
-
-        //Finalizar: apagar alarma y limpiar contador
-        alarmActive = false;
         //Dejar un frame para que AlarmBlink detecte el cambio y apague la luz
         yield return null;
         if (countdownText != null) countdownText.text = "";
@@ -118,11 +119,6 @@ public class InjectionDoorController : MonoBehaviour
             alarmLight.enabled = !alarmLight.enabled;
             yield return new WaitForSeconds(blinkInterval);
         }
-
-        //Al terminar aseguramos que la luz quede apagada
-        alarmLight.enabled = false;
-        AudioManager.Instance.StopLoop("Alarma");
-
     }
     #endregion
 

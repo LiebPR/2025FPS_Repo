@@ -17,6 +17,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_2025FPS_Root/Desing/Scenes/GameScene/SCN_LoseMenu.unity
     guid: 109a7c9bae9d7ae47913a5039df949f1
+  - enabled: 1
+    path: Assets/_2025FPS_Root/Desing/Scenes/GameScene/SCN_WinMenu.unity
+    guid: 08d733b9403f5734195f4bdb1029d9c5
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

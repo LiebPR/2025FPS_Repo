@@ -34,6 +34,10 @@ public class Health : MonoBehaviour
     [SerializeField] string vfxPoolName = "EnemyDeathVFX";
     #endregion
 
+    #region Estados
+    public bool IsAlive => currentHealth > 0;
+    #endregion
+
     #region Events
     public event Action OnDeath; //informa de la muerte del enemigo
     public event Action<Vector3> OnHit; //informa de que le han impactado
@@ -158,8 +162,9 @@ public class Health : MonoBehaviour
         currentHealth = 0;
         if (!isPlayer)
         {
+            AudioManager.Instance.Play("EnemyExplosion");
             OnDeath?.Invoke();
-
+            
             // Spawnear VFX desde la pool
             if (PoolManager.Instance != null && vfxPoolName != "")
             {

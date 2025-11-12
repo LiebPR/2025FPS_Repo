@@ -14,11 +14,10 @@ public class GunSystem : MonoBehaviour
     [SerializeField] Camera fpsCam;
     [SerializeField] Transform shootPoint;
     [SerializeField] LayerMask impactLayer;
-    [SerializeField] PoolManager pool;
     RaycastHit hit;
 
     [Header("Ammo UI")]
-    [SerializeField] Image ammoBar; //image tipo fill
+    [SerializeField] Image ammoBar;
 
     [Header("Weapon Parameters")]
     [SerializeField] int damage = 10;
@@ -38,8 +37,6 @@ public class GunSystem : MonoBehaviour
     [Header("Weapon Shake Effect")]
     [SerializeField] float weaponShakeDuration = 0.5f;
     [SerializeField] float weaponShakeIntensity = 0.2f;
-    Vector3 originalWeaponPosition;
-    Quaternion originalWeaponRotation;
     private bool isShakeActive = false;
     bool isWeaponShaking = false;
 
@@ -98,7 +95,6 @@ public class GunSystem : MonoBehaviour
         canShoot = true;
     }
 
-    #region Inputs
     private void OnEnable()
     {
         InputManager.OnShootEvent += HandleShoot;
@@ -108,7 +104,6 @@ public class GunSystem : MonoBehaviour
     {
         InputManager.OnShootEvent -= HandleShoot;
     }
-    #endregion
 
     void Start()
     {
@@ -118,6 +113,7 @@ public class GunSystem : MonoBehaviour
             weaponOriginalEuler = weaponMesh.localEulerAngles;
             weaponCurrentEuler = weaponOriginalEuler;
         }
+
         camOriginalRotation = fpsCam.transform.localEulerAngles;
 
         if (crosshair != null)
@@ -133,40 +129,26 @@ public class GunSystem : MonoBehaviour
     {
         if (!canShoot) return;
 
-        if (shooting)
+        if (shooting && bulletsLeft > 0 && recoilCoroutine == null)
         {
-            // Solo intentamos disparar si hay balas
-            if (bulletsLeft > 0)
-            {
-                // Si hay munición y podemos disparar
-                if (recoilCoroutine == null)
-                {
-                    recoilCoroutine = StartCoroutine(ShootRoutine()); // Asignar el Coroutine
-                }
-            }
+            recoilCoroutine = StartCoroutine(ShootRoutine());
         }
     }
 
     private void LateUpdate()
     {
-        // CAMARA RECOIL
+        // Recoil cámara
         camCurrentRecoil = Vector3.Lerp(camCurrentRecoil, camTargetRecoil, Time.deltaTime * recoilSpeed);
         fpsCam.transform.localEulerAngles = camOriginalRotation + camCurrentRecoil;
         camTargetRecoil = Vector3.Lerp(camTargetRecoil, Vector3.zero, Time.deltaTime * recoilRecovery);
 
-        // ARMA RECOIL
-        if (weaponMesh != null)
+        // Recoil arma
+        if (weaponMesh != null && !isShakeActive)
         {
-            if (isShakeActive) return;
             weaponCurrentRecoil = Vector3.Lerp(weaponCurrentRecoil, weaponTargetRecoil, Time.deltaTime * weaponRecoilSpeed);
             weaponMesh.localPosition = weaponOriginalPosition + weaponCurrentRecoil;
             weaponTargetRecoil = Vector3.Lerp(weaponTargetRecoil, Vector3.zero, Time.deltaTime * weaponRecoilSpeed);
-        }
 
-        // DAMPING ARMA (solo si no está recargando)
-        if (weaponMesh != null)
-        {
-            if (isShakeActive) return;
             Vector2 mouseDelta = Mouse.current.delta.ReadValue();
             weaponTargetEuler.y = weaponOriginalEuler.y + mouseDelta.x * 0.1f;
             weaponTargetEuler.x = weaponOriginalEuler.x - mouseDelta.y * 0.1f;
@@ -174,7 +156,7 @@ public class GunSystem : MonoBehaviour
             weaponMesh.localEulerAngles = weaponCurrentEuler;
         }
 
-        //Return Crosshair
+        // Crosshair
         if (crosshair != null)
         {
             crosshair.localScale = Vector3.Lerp(crosshair.localScale, crosshairOriginalScale, Time.deltaTime * crosshairReturnSpeed);
@@ -190,7 +172,6 @@ public class GunSystem : MonoBehaviour
 
         Shoot();
         bulletsLeft--;
-
         UpdateAmmoUI();
 
         yield return new WaitForSeconds(shootingCooldown);
@@ -203,7 +184,6 @@ public class GunSystem : MonoBehaviour
 
     void Shoot()
     {
-        //SFX (SHOOT):
         AudioManager.Instance.Play("PlayerShoot");
 
         float currentSpread = GetCurrentSpread();
@@ -217,39 +197,25 @@ public class GunSystem : MonoBehaviour
 
         Debug.DrawRay(fpsCam.transform.position, spreadDir * range, Color.red, 1f);
 
-        // Muzzle flash
-        if (shootPoint != null && pool.HasPool(muzzleFlash))
+        // --- Muzzle Flash ---
+        if (shootPoint != null && PoolManager.Instance.HasPool(muzzleFlash))
         {
-            Vector3 forwardDir = fpsCam.transform.forward;
-            Vector3 spawnPos = shootPoint.position + forwardDir * 0.1f;
-            Quaternion spawnRot = Quaternion.LookRotation(forwardDir);
+            Vector3 spawnPos = shootPoint.position + fpsCam.transform.forward * 0.1f;
+            Quaternion spawnRot = Quaternion.LookRotation(fpsCam.transform.forward);
 
-            GameObject muzzle = pool.Spawn(muzzleFlash, spawnPos, spawnRot);
-            if (muzzle != null && muzzle.activeInHierarchy)
+            GameObject muzzle = PoolManager.Instance.Spawn(muzzleFlash, spawnPos, spawnRot);
+            if (muzzle != null)
             {
                 if (muzzle.TryGetComponent<ParticleSystem>(out ParticleSystem ps))
                 {
-                    if (ps != null && !ps.isPlaying)  // Verifica si el sistema de partículas no está activo
-                    {
-                        ps.Play();  // Reproduce las partículas si no está ya en ejecución
-                    }
+                    ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                    ps.Play();
                 }
-                else
-                {
-                    Debug.LogWarning("ParticleSystem no encontrado en el GameObject del destello.");
-                }
-
-                // Asegúrate de resetear el sistema de partículas antes de liberar el objeto
-                ResetMuzzleFlash(muzzle);  // Detenemos y limpiamos el ParticleSystem
-                pool.Despawn(muzzle.name, muzzle);  // Liberamos el objeto al pool
-            }
-            else
-            {
-                Debug.LogWarning("El GameObject de destello es nulo o no está activo en la jerarquía.");
+                StartCoroutine(DespawnAfterParticles(muzzle, muzzle.GetComponent<ParticleSystem>()));
             }
         }
 
-        // Raycast hit
+        // --- Raycast hit ---
         if (Physics.Raycast(fpsCam.transform.position, spreadDir, out hit, range, impactLayer))
         {
             Health health = hit.collider.GetComponent<Health>() ?? hit.collider.GetComponentInParent<Health>();
@@ -259,10 +225,9 @@ public class GunSystem : MonoBehaviour
                 health.TakeDamage(appliedDamage);
             }
 
-            // Impact VFX
-            if (pool.HasPool(hitEffect))
+            if (PoolManager.Instance.HasPool(hitEffect))
             {
-                GameObject impact = pool.Spawn(hitEffect, hit.point, Quaternion.LookRotation(hit.normal));
+                GameObject impact = PoolManager.Instance.Spawn(hitEffect, hit.point, Quaternion.LookRotation(hit.normal));
                 if (impact.TryGetComponent<ParticleSystem>(out ParticleSystem ps)) ps.Play();
             }
 
@@ -270,7 +235,15 @@ public class GunSystem : MonoBehaviour
         }
 
         ApplyRecoil();
-        AnimationCrosshair();
+        AnimateCrosshair();
+    }
+
+    IEnumerator DespawnAfterParticles(GameObject obj, ParticleSystem ps)
+    {
+        if (ps != null)
+            yield return new WaitUntil(() => !ps.isPlaying);
+
+        PoolManager.Instance.Despawn(muzzleFlash, obj);
     }
     #endregion
 
@@ -305,72 +278,56 @@ public class GunSystem : MonoBehaviour
         isWeaponShaking = true;
         isShakeActive = true;
 
-        originalWeaponRotation = weaponMesh.localRotation;  // Guarda la rotación original del arma (sin tocar la posición)
+        Quaternion originalRotation = weaponMesh.localRotation;
+        float elapsed = 0f;
 
-        float elapsedTime = 0f;
-
-        while (elapsedTime < weaponShakeDuration)
+        while (elapsed < weaponShakeDuration)
         {
-            // Calcular un movimiento de rotación en el eje Y basado en el tiempo
-            float shakeAmount = Mathf.Sin(elapsedTime * Mathf.PI * 2f / weaponShakeDuration) * weaponShakeIntensity;
+            float shakeAmount = Mathf.Sin(elapsed * Mathf.PI * 2f / weaponShakeDuration) * weaponShakeIntensity;
+            weaponMesh.localRotation = Quaternion.Euler(originalRotation.eulerAngles.x, originalRotation.eulerAngles.y + shakeAmount, originalRotation.eulerAngles.z);
 
-            // Mantener la posición original, solo se modifica la rotación en Y
-            weaponMesh.localRotation = Quaternion.Euler(originalWeaponRotation.eulerAngles.x, originalWeaponRotation.eulerAngles.y + shakeAmount, originalWeaponRotation.eulerAngles.z);
-
-            elapsedTime += Time.deltaTime;
-
+            elapsed += Time.deltaTime;
             yield return null;
         }
 
-        // Restaurar la rotación original del arma después del shake
-        weaponMesh.localRotation = originalWeaponRotation;
-
+        weaponMesh.localRotation = originalRotation;
         isWeaponShaking = false;
         isShakeActive = false;
     }
     #endregion
 
-    #region Ammo Size
+    #region Ammo & Crosshair
     void UpdateAmmoUI()
     {
         if (ammoBar)
             ammoBar.fillAmount = (float)bulletsLeft / ammoSize;
     }
 
-
     public int PickUpAmmo(int units)
     {
-        int previousBullets = bulletsLeft;
-
+        int prev = bulletsLeft;
         bulletsLeft = Mathf.Min(bulletsLeft + units, ammoSize);
-
         UpdateAmmoUI();
-
-        return bulletsLeft - previousBullets; // devuelve lo que realmente entró
+        return bulletsLeft - prev;
     }
 
-    #endregion
-
-    #region Animation Crosshair
-    void AnimationCrosshair()
+    void AnimateCrosshair()
     {
         if (crosshair == null) return;
-
         crosshair.localScale = crosshairOriginalScale * crosshairScaleAmount;
-
-        crosshair.localRotation = Quaternion.Euler(crosshairOriginalRotation.eulerAngles.x, crosshairOriginalRotation.eulerAngles.y, crosshairOriginalRotation.eulerAngles.z + crosshairRotateAmount);
+        crosshair.localRotation = Quaternion.Euler(crosshairOriginalRotation.eulerAngles.x,
+                                                  crosshairOriginalRotation.eulerAngles.y,
+                                                  crosshairOriginalRotation.eulerAngles.z + crosshairRotateAmount);
     }
     #endregion
 
     #region Inputs
     void HandleShoot()
     {
-        if (OxygenPickUp.IsConsumingOxygen) return; // Bloqueamos disparo si esta consumiendo oxigeno.
+        if (OxygenPickUp.IsConsumingOxygen) return;
 
-        // Si no hay munición, simplemente ignoramos el disparo y no hacemos nada.
         if (bulletsLeft <= 0)
         {
-            // Iniciar Shake en el arma
             if (!isWeaponShaking)
             {
                 AudioManager.Instance.Play("ShootError");
@@ -380,20 +337,7 @@ public class GunSystem : MonoBehaviour
             return;
         }
 
-        // Si hay munición
         shooting = true;
     }
     #endregion
-
-    public void ResetMuzzleFlash(GameObject muzzle)
-    {
-        if (muzzle.TryGetComponent<ParticleSystem>(out ParticleSystem ps))
-        {
-            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear); // Detener las partículas y limpiar cualquier residual.
-        }
-        else
-        {
-            Debug.LogWarning("No se encontró el sistema de partículas en el objeto muzzle.");
-        }
-    }
 }

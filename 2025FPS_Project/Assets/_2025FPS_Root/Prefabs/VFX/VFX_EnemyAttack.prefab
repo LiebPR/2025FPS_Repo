@@ -14748,7 +14748,7 @@ GameObject:
   - component: {fileID: 7371411750713545812}
   - component: {fileID: 9036070854088486214}
   - component: {fileID: 1001431605857509409}
-  - component: {fileID: 1711088712882506689}
+  - component: {fileID: 3890345146288809730}
   m_Layer: 0
   m_Name: VFX_EnemyAttack
   m_TagString: Untagged
@@ -19576,7 +19576,7 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
---- !u!114 &1711088712882506689
+--- !u!114 &3890345146288809730
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -19585,7 +19585,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 5365793910920681531}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a79fba548c4367549a6a380864c8bb24, type: 3}
+  m_Script: {fileID: 11500000, guid: 76aef8b6fdb2e7b4ca625d824999505f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   lifeTime: 3
+  poolName: ChargeEffect

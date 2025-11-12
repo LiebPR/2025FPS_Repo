@@ -261,6 +261,51 @@ public class AudioManager : MonoBehaviour
         StopAndReleaseSource(src, active3DLoops);
     }
 
+    /// <summary>
+    /// Detiene un sonido específico por su ID, ya sea BGM, SFX 2D o SFX 3D.
+    /// </summary>
+    public void Stop(string id)
+    {
+        AudioEntry entry = table.Get(id);
+        if (entry == null) return;
+
+        // 1. Detener BGM
+        if (entry.group == AudioGroup.BGM && bgmSource.isPlaying && bgmSource.clip == entry.clip)
+        {
+            bgmSource.Stop();
+            bgmSource.loop = false;
+            return;
+        }
+
+        // 2. Detener SFX 2D loop
+        if (active2DLoops.ContainsKey(id))
+        {
+            AudioSource src = active2DLoops[id];
+            StopAndReleaseSource(src, active2DLoops);
+            return;
+        }
+
+        // 3. Detener SFX 3D loop
+        if (active3DLoops.ContainsKey(id))
+        {
+            AudioSource src = active3DLoops[id];
+            StopAndReleaseSource(src, active3DLoops);
+            return;
+        }
+
+        // 4. Detener one-shot 3D si está sonando (opcional: recorre el pool)
+        foreach (AudioSource src in pool)
+        {
+            if (src.clip != null && src.clip.name == id && src.isPlaying)
+            {
+                src.Stop();
+                src.gameObject.SetActive(false);
+                pool.Enqueue(src);
+                break;
+            }
+        }
+    }
+
     // Método auxiliar para detener y liberar una fuente
     private void StopAndReleaseSource(AudioSource src, Dictionary<string, AudioSource> activeDict)
     {
