@@ -38,6 +38,6 @@ MonoBehaviour:
     initialSize: 20
     canExpand: 1
   - poolName: Ammo
-    prefab: {fileID: 7008232548757848766, guid: d005133193c30d748b452b749c213125, type: 3}
+    prefab: {fileID: 3795680046911225711, guid: 1c0148a06cb67c44d81d3eaec560308f, type: 3}
     initialSize: 20
     canExpand: 1
