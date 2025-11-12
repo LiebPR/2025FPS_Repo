@@ -213,7 +213,7 @@ MonoBehaviour:
   oxygenRate: 10
   shrinkSpeed: 1
   minScale: 0.5
-  highlightMaterial: {fileID: 2100000, guid: 25e1f4d730f3b7a45892a0bc42adaa41, type: 2}
+  highlightMaterial: {fileID: 2100000, guid: 2bc0328740cbcf34abd312813e575878, type: 2}
   fadeOutSpeed: 5
 --- !u!82 &4344272062833718236
 AudioSource:
