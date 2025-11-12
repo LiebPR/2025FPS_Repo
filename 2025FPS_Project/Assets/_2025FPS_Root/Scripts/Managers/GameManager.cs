@@ -69,6 +69,7 @@ public class GameManager : MonoBehaviour
 
         SetState(GameState.Win);
         OnGameWin?.Invoke();
+        AudioManager.Instance.StopAllSFXExceptBGM();
         SceneManagerSimple.Instance.LoadScene("SCN_WinMenu");
     }
     #endregion

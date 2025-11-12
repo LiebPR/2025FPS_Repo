@@ -10,7 +10,6 @@ public class EnemySpawner : MonoBehaviour
 {
     #region General Variables
     [Header("PoolManager")]
-    [SerializeField] PoolManager poolManager;
     [SerializeField] string poolName = "Enemy"; //nombre de la pool a spawnear
 
     [Header("Spawner Settings")]
@@ -28,9 +27,8 @@ public class EnemySpawner : MonoBehaviour
 
     private void Start()
     {
-        if (poolManager == null) return;
 
-        poolManager.Initialize();
+        PoolManager.Instance.Initialize();
         StartCoroutine(SpawnInitialEnemies());
     }
 
@@ -66,7 +64,7 @@ public class EnemySpawner : MonoBehaviour
 
         Vector3 spawnPos = GetRandomPointInsideCollider(spawnZone);
 
-        GameObject enemy = poolManager.Spawn(poolName, spawnPos, Quaternion.identity);
+        GameObject enemy = PoolManager.Instance.Spawn(poolName, spawnPos, Quaternion.identity);
         if (enemy == null) return;
 
         activeEnemies.Add(enemy);

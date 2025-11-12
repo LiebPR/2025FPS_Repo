@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class EnemyEventManager : MonoBehaviour
 {
@@ -8,6 +8,7 @@ public class EnemyEventManager : MonoBehaviour
     ListenSystem listenSystem;
     EnemyMovement movement;
     Health health;
+    InjectionDoorController doorController;
     #endregion
 
     private void Awake()
@@ -17,6 +18,7 @@ public class EnemyEventManager : MonoBehaviour
         listenSystem = GetComponent<ListenSystem>();
         movement = GetComponent<EnemyMovement>();
         health = GetComponent<Health>();
+        doorController = FindAnyObjectByType<InjectionDoorController>();
     }
 
     private void OnEnable()
@@ -55,31 +57,65 @@ public class EnemyEventManager : MonoBehaviour
         health.OnHit -= HandleHit;
     }
 
+    bool AlarmActive => doorController != null && doorController.IsAlarmActive;
+    private void Update()
+    {
+        if (AlarmActive)
+        {
+            fsm.OnChase();
+            return;
+        }
+
+    }
+
     #region Vision Hanlders
-    void HandleTargetSee(Transform target) => fsm.OnChase();
-    void HandleTargetLost(Transform target) => fsm.OnPatrol();
+    void HandleTargetSee(Transform target)
+    {
+        if (AlarmActive)
+        {
+            fsm.OnChase();
+            return;
+        }
+        fsm.OnChase();
+    }
+    void HandleTargetLost(Transform target)
+    {
+        if (AlarmActive) return;
+        fsm.OnPatrol();
+    }
     #endregion
 
     #region Listen Handlers
     void HandleListen(Transform playerTransform)
     {
+        if (AlarmActive) return;
         fsm.OnChase();
     }
     void HandleDontListen(Transform playerTransform)
     {
+        if (AlarmActive) return;
         fsm.OnPatrol();
     }
     #endregion
 
     #region Movement Handlers
     //Idle: 
-    void HandleIdleEnter() => fsm.OnIdle();
-    void HandleIdleExit() => fsm.OnPatrol();
+    void HandleIdleEnter()
+    {
+        if (AlarmActive) return;
+        fsm.OnIdle();
+    }
+    void HandleIdleExit()
+    {
+        if (AlarmActive) return;
+        fsm.OnPatrol();
+    }
     #endregion
 
     #region Health Handlers
     void HandleHit(Vector3 hit)
     {
+        if(AlarmActive) return;
         fsm.OnChase();
     }
     #endregion

@@ -5025,10 +5025,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 4411316486304211303}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a79fba548c4367549a6a380864c8bb24, type: 3}
+  m_Script: {fileID: 11500000, guid: 76aef8b6fdb2e7b4ca625d824999505f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lifeTime: 1
+  lifeTime: 2
+  poolName: HitEffect
 --- !u!1 &5709990821356373619
 GameObject:
   m_ObjectHideFlags: 0

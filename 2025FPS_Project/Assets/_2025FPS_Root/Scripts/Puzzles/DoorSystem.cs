@@ -1,52 +1,59 @@
 using UnityEngine;
 
 /// <summary>
-/// DoorSystem: Controla el estado de la puerta (abrir/cerrar) mediante animación o lógica directa.
+/// DoorSystem: Controla la puerta elevadora mediante movimiento vertical.
 /// </summary>
 public class DoorSystem : MonoBehaviour
 {
     #region General Variables
-    [SerializeField] string openBoolName = "Open"; //Nombre del parámetro booleano en el Animator
-    [SerializeField] bool isOpen = false; //Estado actual de la puerta
+    [SerializeField] bool isOpen = false; // Estado actual de la puerta
+    [SerializeField] float openHeight = 3f; // Altura a la que se abre la puerta
+    [SerializeField] float moveSpeed = 2f; // Velocidad de movimiento
     #endregion
 
-    #region References
-    Animator doorAnimator;
+    #region Private Variables
+    Vector3 closedPosition;
+    Vector3 openPosition;
     #endregion
 
     private void Awake()
     {
-        doorAnimator = GetComponent<Animator>();
+        closedPosition = transform.position;
+        openPosition = closedPosition + Vector3.up * openHeight;
+    }
+
+    private void Update()
+    {
+        // Determina la posición objetivo según el estado
+        Vector3 targetPosition = isOpen ? openPosition : closedPosition;
+        
+            // Mueve la puerta suavemente hacia la posición objetivo
+            transform.position = Vector3.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
     }
 
     #region Public Methods
-    //Abre la puerta si no está abierta
     public void OpenDoor()
     {
         if (isOpen) return;
         isOpen = true;
 
-        if (doorAnimator != null)
-            doorAnimator.SetBool(openBoolName, true);
+        AudioManager.Instance.Play("PuertaAbrir");
     }
-    
-    //Cierra la puerta si está abierta
+
     public void CloseDoor()
     {
         if (!isOpen) return;
         isOpen = false;
 
-        if (doorAnimator != null)
-            doorAnimator.SetBool(openBoolName, false);
+        AudioManager.Instance.Play("PuertaCerrar");
     }
 
-    //Cambia el estado de la puerta (abre si está cerrado y cierra si esta abierta).
     public void ToggleDoor()
     {
-        if (isOpen)
+        if(isOpen)
             CloseDoor();
-        else
+        else 
             OpenDoor();
     }
-    #endregion 
+    #endregion
 }

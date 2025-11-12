@@ -29,7 +29,6 @@ public class PoolManager : MonoBehaviour
         }
 
         Instance = this; // Asignar la instancia
-        DontDestroyOnLoad(gameObject); // Mantener esta instancia en todas las escenas
     }
 
     //Inicializa todas las pools declaradas en poolData
@@ -101,23 +100,15 @@ public class PoolManager : MonoBehaviour
     {
         if (!poolDictionary.ContainsKey(poolName))
         {
+            Debug.LogWarning($"Pool '{poolName}' no existe en Despawn. Se destruye objeto.");
             Destroy(obj); // Si la pool no existe, destruimos el objeto
             return;
         }
 
         if (obj == null) // Verifica que el objeto no sea nulo antes de procesarlo
         {
+            Debug.LogWarning($"Objeto nulo recibido en Despawn de pool '{poolName}'");
             return;
-        }
-
-        if (obj.TryGetComponent<ParticleSystem>(out ParticleSystem ps))
-        {
-            // Llamamos al método ResetMuzzleFlash solo si el objeto es de tipo GunSystem
-            GunSystem gunSystem = FindAnyObjectByType<GunSystem>();
-            if (gunSystem != null)
-            {
-                gunSystem.ResetMuzzleFlash(obj);  // Aquí se invoca el método correctamente
-            }
         }
 
         obj.SetActive(false); // Desactiva el objeto
@@ -125,6 +116,7 @@ public class PoolManager : MonoBehaviour
         if (!obj.Equals(null)) // Verifica que el objeto no haya sido destruido antes de devolverlo al pool
         {
             poolDictionary[poolName].Enqueue(obj); // Lo devuelve a la cola
+            Debug.Log($"Objeto devuelto a pool '{poolName}': {obj.name}");
         }
     }
     #endregion

@@ -44,7 +44,7 @@ public class AmmoPickUp : MonoBehaviour, IInteractable
         if (given > 0)
         {
             AudioManager.Instance.Play("AmmoPickUpTrue");
-            PoolManager.Instance.Despawn("Ammo", gameObject); //solo desaparece si realmente dio algo
+            PoolManager.Instance.Despawn("Ammo", gameObject);
         }
         else
         {

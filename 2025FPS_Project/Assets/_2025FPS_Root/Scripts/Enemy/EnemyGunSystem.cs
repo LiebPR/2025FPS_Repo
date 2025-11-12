@@ -1,81 +1,66 @@
 using System.Collections;
 using UnityEngine;
 
-/// <summary>
-/// EnemyGunSystem: Gestiona el disparo del enemigo de manera independiente al FSM.
-/// Solo dispara si el enemigo está en estado Chase y tiene visión directa del jugador. 
-/// </summary>
 public class EnemyGunSystem : MonoBehaviour
 {
     [SerializeField] Transform shootPoint;
-    [SerializeField] string chargeEffect = "ChargeEffect"; // Efecto de partículas al disparar
-    [SerializeField] PoolManager pool; // Pool de partículas
+    [SerializeField] string chargeEffect = "ChargeEffect";
     [SerializeField] private Material laserMaterial;
+    [SerializeField] Transform childToShrink;
+    [SerializeField] float waitTimeBeforeShoot = 1f;
+    [SerializeField] float shrinkDuration = 0.5f;
+    [SerializeField] float shrinkFactor = 0.8f;
+    [SerializeField] float restoreSpeed = 5f;
 
-    #region New Variables
-    [SerializeField] Transform childToShrink; // Hijo al que se le cambiará la escala (puedes asignar el hijo desde el editor)
-    [SerializeField] float waitTimeBeforeShoot = 1f; // Tiempo de espera antes de disparar
-    [SerializeField] float shrinkDuration = 0.5f; // Tiempo en el que el hijo se encoge
-    [SerializeField] float shrinkFactor = 0.8f; // Factor de reducción de tamaño (80% del tamaño original)
-    [SerializeField] float restoreSpeed = 5f; // Velocidad para restaurar el tamaño original
-    private Vector3 originalScale; // Almacena el tamaño original del hijo
-    #endregion
-
-    #region State Variables
-    bool canShoot = true;
-    RaycastHit hit;
+    Vector3 originalScale;
     Coroutine shootingRoutine;
-    #endregion
+    bool canShoot = true;
 
-    #region References
     [SerializeField] Enemy enemyData;
     EnemyStateMachine fsm;
     VisionSystem vision;
     LevitationMeshEffect levitationEffect;
     EnemyMovement enemyMovement;
-    Health healthComponent; // Referencia al componente Health
-    #endregion
+    Health healthComponent;
+
+    GameObject activeChargeVFX;
 
     private void Awake()
     {
         fsm = GetComponent<EnemyStateMachine>();
         vision = GetComponent<VisionSystem>();
         enemyMovement = GetComponent<EnemyMovement>();
-        pool = PoolManager.Instance; // Referencia al PoolManager de forma automática
         levitationEffect = GetComponentInChildren<LevitationMeshEffect>();
-        healthComponent = GetComponent<Health>(); // Obtener el componente Health
+        healthComponent = GetComponent<Health>();
 
-        // Almacena el tamaño original del hijo
         if (childToShrink != null)
-        {
             originalScale = childToShrink.localScale;
-        }
     }
 
     private void OnEnable()
     {
         canShoot = true;
-        if (fsm == null) fsm = GetComponent<EnemyStateMachine>();
-        if (vision == null) vision = GetComponent<VisionSystem>();
+        if (healthComponent != null)
+            healthComponent.OnDeath += HandleDeath;
     }
 
     private void OnDisable()
     {
         if (shootingRoutine != null)
-        {
-            StopCoroutine(shootingRoutine); // Detiene cualquier coroutine activa de disparo
-        }
+            StopCoroutine(shootingRoutine);
+
+        if (healthComponent != null)
+            healthComponent.OnDeath -= HandleDeath;
     }
 
     private void Update()
     {
-        if (CanAttackTarget()) // Verificamos si el enemigo está muerto
+        if (CanAttackTarget())
         {
             TryShoot();
         }
     }
 
-    #region Shooting Logic
     void TryShoot()
     {
         if (!canShoot) return;
@@ -86,153 +71,141 @@ public class EnemyGunSystem : MonoBehaviour
     {
         canShoot = false;
 
-        // Espera un tiempo antes de empezar a encoger
+        // Espera antes de disparar
         yield return new WaitForSeconds(waitTimeBeforeShoot);
-        if (levitationEffect != null)
-        {
-            levitationEffect.StopLevitating();  // Detener la levitación
-        }
 
-        // Detener movimiento antes de disparar
+        if (!IsAlive()) { canShoot = true; yield break; }
+
+        levitationEffect?.StopLevitating();
         enemyMovement.StopMovement();
         AudioManager.Instance.Play("EnemyAttack");
-        // Encoge el hijo suavemente con Easy In
+
         if (childToShrink != null)
         {
-            // VFX
-            if (!string.IsNullOrEmpty(chargeEffect) && pool.HasPool(chargeEffect))
+            // Spawn Charge VFX
+            if (!string.IsNullOrEmpty(chargeEffect) && PoolManager.Instance.HasPool(chargeEffect))
             {
-                GameObject chargeVFX = pool.Spawn(chargeEffect, shootPoint.position, shootPoint.rotation);
-                if (chargeVFX.TryGetComponent<ParticleSystem>(out ParticleSystem ps))
-                {
+                activeChargeVFX = PoolManager.Instance.Spawn(chargeEffect, shootPoint.position, shootPoint.rotation);
+                if (activeChargeVFX.TryGetComponent<ParticleSystem>(out ParticleSystem ps))
                     ps.Play();
-                }
             }
+
             yield return StartCoroutine(SmoothShrink(childToShrink, shrinkFactor, shrinkDuration));
+            if (!IsAlive()) { yield return SmoothRestoreImmediate(); yield break; }
         }
 
-        // Disparo
         Shoot();
+        if (!IsAlive()) { yield return SmoothRestoreImmediate(); yield break; }
 
-        // Restaura la escala del hijo con Easy Out después de disparar
         if (childToShrink != null)
-        {
             yield return StartCoroutine(SmoothRestore(childToShrink, restoreSpeed));
-        }
 
-        levitationEffect.StartLevitating();
-
-
+        levitationEffect?.StartLevitating();
         yield return new WaitForSeconds(enemyData.shootingCooldown);
         canShoot = true;
     }
 
     void Shoot()
     {
-        if (shootPoint == null) return;
+        if (!IsAlive() || shootPoint == null) return;
 
         Vector3 direction = shootPoint.forward;
-
-        // Reactivar movimiento después de disparar
         enemyMovement.ResumeMovement();
 
-        if (Physics.Raycast(shootPoint.position, direction, out hit, enemyData.range, enemyData.impactLayer))
+        if (Physics.Raycast(shootPoint.position, direction, out RaycastHit hit, enemyData.range, enemyData.impactLayer))
         {
-            Debug.DrawRay(shootPoint.position, direction * enemyData.range, Color.cyan, 1f);
-
-            // Instanciar el láser desde la pool
-            GameObject laser = pool.Spawn("LaserPool", shootPoint.position, shootPoint.rotation);
-
-            // Asegurarse de que el objeto instanciado tiene el componente Laser
-            Laser laserScript = laser.GetComponent<Laser>();
-            if (laserScript != null)
-            {
-                // Llamamos a Initialize para configurar la posición de inicio y final del rayo
+            GameObject laser = PoolManager.Instance.Spawn("LaserPool", shootPoint.position, shootPoint.rotation);
+            if (laser.TryGetComponent<Laser>(out Laser laserScript))
                 laserScript.Initialize(shootPoint.position, hit.point, laserMaterial);
-            }
 
-            // Daño al jugador si es necesario
             if (hit.collider.TryGetComponent(out Health health))
-            {
                 health.TakeDamage(enemyData.damage);
-            }
         }
     }
-    #endregion
 
-    #region Conditions 
     bool CanAttackTarget()
     {
-        if (vision == null || fsm == null) return false;
+        if (!vision || !fsm || !IsAlive()) return false;
         if (!vision.CanSeeTarget) return false;
         if (fsm.currentState != EnemyState.Chase) return false;
         if (!IsTargetInAttackArea()) return false;
-
         return true;
     }
 
     bool IsTargetInAttackArea()
     {
         if (vision.Target == null) return false;
-
         float distance = Vector3.Distance(transform.position, vision.Target.position);
         return distance <= enemyData.attackRange;
     }
-    #endregion
 
-    #region Smooth Scaling Logic
-    /// <summary>
-    /// Realiza un encogimiento suave en el hijo especificado (Easy In).
-    /// </summary>
-    /// <param name="child">Transform del hijo a encoger</param>
-    /// <param name="shrinkFactor">Factor de reducción de la escala</param>
-    /// <param name="duration">Duración de la animación de encogimiento</param>
-    IEnumerator SmoothShrink(Transform child, float shrinkFactor, float duration)
+    IEnumerator SmoothShrink(Transform child, float factor, float duration)
     {
-        // Realiza el encogimiento suave (Easy In)
-        Vector3 originalScale = child.localScale;
-        Vector3 targetScale = originalScale * shrinkFactor;
+        Vector3 start = child.localScale;
+        Vector3 target = start * factor;
+        float t = 0f;
 
-        float timeElapsed = 0f;
-
-        while (timeElapsed < duration)
+        while (t < duration)
         {
-            // Utiliza SmoothStep para hacer un "easy in" (aceleración al principio)
-            float smoothStep = Mathf.SmoothStep(0f, 1f, timeElapsed / duration);
-            child.localScale = Vector3.Lerp(originalScale, targetScale, smoothStep);
-            timeElapsed += Time.deltaTime;
+            if (!IsAlive()) yield break;
+            t += Time.deltaTime;
+            float smooth = Mathf.SmoothStep(0f, 1f, t / duration);
+            child.localScale = Vector3.Lerp(start, target, smooth);
             yield return null;
         }
 
-        // Asegura que la escala final sea exactamente la deseada
-        child.localScale = targetScale;
+        child.localScale = target;
     }
 
-    /// <summary>
-    /// Restaura suavemente la escala del hijo a su tamaño original (Easy Out).
-    /// </summary>
-    /// <param name="child">Transform del hijo a restaurar</param>
-    /// <param name="speed">Velocidad de restauración de la escala</param>
     IEnumerator SmoothRestore(Transform child, float speed)
     {
-        // Utiliza el tamaño original guardado previamente
         while (child.localScale != originalScale)
         {
-            // Utiliza MoveTowards para hacer un "easy out" (desaceleración al final)
             child.localScale = Vector3.MoveTowards(child.localScale, originalScale, speed * Time.deltaTime);
             yield return null;
         }
-
-        // Asegura que la escala final sea exactamente la original
-        child.localScale = originalScale;
     }
-    #endregion
 
-    #region Gizmos
-    private void OnDrawGizmosSelected()
+    IEnumerator SmoothRestoreImmediate()
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, enemyData.attackRange);
+        if (childToShrink != null)
+        {
+            childToShrink.localScale = originalScale;
+            if (activeChargeVFX != null)
+            {
+                PoolManager.Instance.Despawn(chargeEffect, activeChargeVFX);
+                activeChargeVFX = null;
+            }
+        }
+
+        levitationEffect?.StartLevitating();
+        enemyMovement.ResumeMovement();
+        canShoot = true;
+        yield break;
     }
-    #endregion
+
+    void HandleDeath()
+    {
+        canShoot = false;
+
+        if (shootingRoutine != null)
+        {
+            StopCoroutine(shootingRoutine);
+            shootingRoutine = null;
+        }
+        AudioManager.Instance.Stop("EnemyAttack");
+        if (childToShrink != null)
+            childToShrink.localScale = originalScale;
+
+        if (activeChargeVFX != null)
+        {
+            PoolManager.Instance.Despawn(chargeEffect, activeChargeVFX);
+            activeChargeVFX = null;
+        }
+
+        levitationEffect?.StopLevitating();
+        enemyMovement.StopMovement();
+    }
+
+    bool IsAlive() => healthComponent != null && healthComponent.IsAlive; // Aquí puedes reemplazar por un flag real de Health
 }

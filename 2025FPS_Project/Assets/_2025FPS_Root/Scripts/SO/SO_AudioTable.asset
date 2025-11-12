@@ -93,3 +93,19 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: a81112991246bbb4f8358aa3f4e5d8f9, type: 3}
     group: 2
     defaultVolume: 0.5
+  - id: EnemyExplosion
+    clip: {fileID: 8300000, guid: 02f2d93308e217243abccc965cd7ef9a, type: 3}
+    group: 2
+    defaultVolume: 0.5
+  - id: PuertaAbrir
+    clip: {fileID: 8300000, guid: eac92b24466c8c94abab4947a561c4e4, type: 3}
+    group: 2
+    defaultVolume: 0.5
+  - id: PuertaCerrar
+    clip: {fileID: 8300000, guid: 546edfd6a01186040b7570227a2a93fc, type: 3}
+    group: 2
+    defaultVolume: 0.5
+  - id: WinMenuBGM
+    clip: {fileID: 8300000, guid: fdef4de900fa89d4d95944b8cbfecbd4, type: 3}
+    group: 2
+    defaultVolume: 0.4
