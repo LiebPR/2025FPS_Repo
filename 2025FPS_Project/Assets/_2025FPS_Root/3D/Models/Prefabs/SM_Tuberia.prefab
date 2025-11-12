@@ -52,6 +52,18 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 2f15cf679da97884d91e0cf7ce3e5383, type: 2}
+    - target: {fileID: -7141715990378919174, guid: 882724b5b64c4794f914eb2d5b9036c1, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 2f15cf679da97884d91e0cf7ce3e5383, type: 2}
+    - target: {fileID: -6942842322144961714, guid: 882724b5b64c4794f914eb2d5b9036c1, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 2f15cf679da97884d91e0cf7ce3e5383, type: 2}
+    - target: {fileID: -5882901960353520284, guid: 882724b5b64c4794f914eb2d5b9036c1, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: d94df84d74699cb4cbdd5bc6c4b2344e, type: 2}
     - target: {fileID: 919132149155446097, guid: 882724b5b64c4794f914eb2d5b9036c1, type: 3}
       propertyPath: m_Name
       value: SM_Tuberia
