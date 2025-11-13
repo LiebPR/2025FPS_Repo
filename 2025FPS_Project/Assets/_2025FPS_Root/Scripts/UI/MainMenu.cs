@@ -14,7 +14,7 @@ public class MainMenuMusic : MonoBehaviour
         AudioManager.Instance.Play("StartPressButton");
         
         // Detener la música de fondo del menú y cargar la escena de juego
-        SceneManagerSimple.Instance.LoadScene("SCN_AlejandroTask");
+        SceneManagerSimple.Instance.LoadScene("SCN_GameMenu");
     }
 
     public void OnExitButtonPressed()

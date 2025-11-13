@@ -311,7 +311,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.3, y: 1.3, z: 1.3}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1796109003998219446}
@@ -488,7 +488,7 @@ MonoBehaviour:
   fullHealthColor: {r: 0, g: 0, b: 0, a: 0}
   damagedMat: {fileID: 2100000, guid: 25e1f4d730f3b7a45892a0bc42adaa41, type: 2}
   healthBar: {fileID: 0}
-  dropPrefab: {fileID: 7008232548757848766, guid: d005133193c30d748b452b749c213125, type: 3}
+  dropPrefab: {fileID: 3795680046911225711, guid: 1c0148a06cb67c44d81d3eaec560308f, type: 3}
   percentChance: 0.5
   vfxPoolName: EnemyDeathVFX
 --- !u!114 &7396709396287491517
@@ -505,7 +505,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shootPoint: {fileID: 5301221107631865196}
   chargeEffect: ChargeEffect
-  pool: {fileID: 0}
   laserMaterial: {fileID: 2100000, guid: 72bbf9ed434df8a449dc872d75a39ea3, type: 2}
   childToShrink: {fileID: 1796109003998219446}
   waitTimeBeforeShoot: 1

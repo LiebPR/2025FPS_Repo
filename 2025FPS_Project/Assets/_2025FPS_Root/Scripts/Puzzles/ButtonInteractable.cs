@@ -30,23 +30,25 @@ public class ButtonInteractable : MonoBehaviour, IInteractable
     // Se llama al presionar el botón
     public void OnPress()
     {
-        // Animación toggle como feedback
         if (animButton != null)
         {
+            animButton.ResetTrigger(pressUpTrigger);  // Asegura que el trigger anterior se resetee
             if (!string.IsNullOrEmpty(pressDownTrigger))
                 animButton.SetTrigger(pressDownTrigger);
+            linkedDoor?.ToggleDoor();
             AudioManager.Instance.Play("ClickButton");
         }
 
-        // Cambiar el estado de la puerta
-        linkedDoor?.ToggleDoor();
+        
     }
 
-    // No necesitamos OnRelease para toggle
-    public void OnRelease() 
+    public void OnRelease()
     {
         if (animButton != null && !string.IsNullOrEmpty(pressUpTrigger))
+        {
+            animButton.ResetTrigger(pressDownTrigger);  // Asegura que el trigger anterior se resetee
             animButton.SetTrigger(pressUpTrigger);
+        }
 
         AudioManager.Instance.Play("UnClickButton");
     }

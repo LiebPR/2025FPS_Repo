@@ -4,36 +4,40 @@ using UnityEngine;
 using System;
 
 /// <summary>
-/// InjectionDoorController: Controla la apertura de la puerta (el propio GameObject),
+/// InjectionDoorController: Controla la apertura de la puerta (con animación),
 /// el contador visible (mm:ss) y la alarma visual (Point Light parpadeante).
 /// </summary>
 public class InjectionDoorController : MonoBehaviour
 {
     #region Gneral Variables
-    [Header("Movimiento")]
-    [SerializeField] float openHeight = 3f; //altura total a desplazar en unidades
-    [SerializeField] float openDuration = 60f; //duración de la apertura en segundos (ej. 60 = 01:00)
+    [Header("Animación")]
+    Animator doorAnimator; // Referencia al Animator de la puerta
+    [SerializeField] string openAnimationTrigger = "OpenDoor"; // Nombre del trigger de animación
 
     [Header("Alarma")]
-    [SerializeField] Light alarmLight; //point Light para la alarma
-    [SerializeField] float blinkInterval = 0.35f; //intervalo de parpadeo de la luz
-    bool alarmActive; //indica si la alarma está activa
+    [SerializeField] Light alarmLight; // Point Light para la alarma
+    [SerializeField] float blinkInterval = 0.35f; // Intervalo de parpadeo de la luz
+    bool alarmActive; // Indica si la alarma está activa
 
     [Header("Contador")]
-    [SerializeField] TMP_Text countdownText; //texto TMP en world space sobre la puerta
+    [SerializeField] TMP_Text countdownText; // Texto TMP en world space sobre la puerta
 
-    //Estado Interno: 
-    bool isOpening; //evita múltiples llamadas simultáneas
+    // Estado Interno:
+    bool isOpening; // Evita múltiples llamadas simultáneas
     #endregion
 
     #region Getters
-    //Informe público sobre si la alarma está activa.
+    // Informe público sobre si la alarma está activa.
     public bool IsAlarmActive => alarmActive;
     #endregion
 
+    private void Awake()
+    {
+        doorAnimator = GetComponent<Animator>();
+    }
 
     #region API
-    //El contador mostrará el tiempo restante en formato mm:ss y la alarma parpadeará durante todo el proceso
+    // El contador mostrará el tiempo restante en formato mm:ss y la alarma parpadeará durante todo el proceso
     public void OpenDoor()
     {
         if (isOpening) return;
@@ -41,7 +45,7 @@ public class InjectionDoorController : MonoBehaviour
         StartCoroutine(OpenDoorAndCountdown());
     }
 
-    //Fuerza detener cualquier proceso y resetea la puerta a la posición inicial (opcional).
+    // Fuerza detener cualquier proceso y resetea la puerta a la posición inicial (opcional).
     public void StopAndReset()
     {
         StopAllCoroutines();
@@ -49,6 +53,9 @@ public class InjectionDoorController : MonoBehaviour
         isOpening = false;
         if (alarmLight != null) alarmLight.enabled = false;
         if (countdownText != null) countdownText.text = "";
+
+        // Resetea la animación a la posición inicial
+        if (doorAnimator != null) doorAnimator.SetTrigger("ResetDoor");
     }
     #endregion
 
@@ -57,41 +64,38 @@ public class InjectionDoorController : MonoBehaviour
     {
         isOpening = true;
 
-
         AudioManager.Instance.Play("BigElevatorDoor");
-        //Activar alarma y corrutina de parpadeo
+
+        // Activar alarma y corrutina de parpadeo
         alarmActive = true;
         if (alarmLight != null) alarmLight.color = Color.red;
         StartCoroutine(AlarmBlink());
 
-        //Posiciones absolutas (la puerta es este mismo transform)
-        Vector3 startPos = transform.position;
-        Vector3 endPos = startPos + Vector3.up * openHeight;
+        // Inicia la animación de apertura
+        if (doorAnimator != null)
+        {
+            doorAnimator.SetTrigger(openAnimationTrigger);
+        }
 
-        float elapsed = 0f;
+        float openDuration = 60f; // Duración de la animación en segundos (ajustar según la animación)
 
-        //Mostrar inicialmente la cuenta 01:00 (ceil para mostrar 60s al inicio)
+        // Mostrar inicialmente la cuenta 01:00 (ceil para mostrar 60s al inicio)
         UpdateCountdown(openDuration);
 
-        while (elapsed < openDuration)
+        // Corutina para la cuenta atrás
+        float elapsedTime = 0f;
+        while (elapsedTime < openDuration)
         {
-            elapsed += Time.deltaTime;
-            float t = Mathf.Clamp01(elapsed / openDuration);
+            elapsedTime += Time.deltaTime;
 
-            //Movimiento suave interpolado en el tiempo total
-            transform.position = Vector3.Lerp(startPos, endPos, t);
-
-            //Actualizar contador con tiempo restante (ceil para que muestre 01:00 ... 00:01, luego 00:00)
-            float remaining = Mathf.Max(0f, openDuration - elapsed);
-            UpdateCountdown(remaining);
+            // Actualiza el contador
+            float remainingTime = Mathf.Max(0f, openDuration - elapsedTime);
+            UpdateCountdown(remainingTime);
 
             yield return null;
         }
 
-        //Asegurar posición final exacta
-        transform.position = endPos;
-        //Dejar un frame para que AlarmBlink detecte el cambio y apague la luz
-        yield return null;
+        // Asegurar que el contador se detenga
         if (countdownText != null) countdownText.text = "";
 
         isOpening = false;
@@ -103,15 +107,15 @@ public class InjectionDoorController : MonoBehaviour
     {
         AudioManager.Instance.PlayLoop("Alarma");
 
-        //Protección: si no hay luz, salir
+        // Protección: si no hay luz, salir
         if (alarmLight == null)
         {
-            //Si no hay luz, igualmente mantenemos el flag de alarma hasta que termine la apertura
+            // Si no hay luz, igualmente mantenemos el flag de alarma hasta que termine la apertura
             while (alarmActive) yield return null;
             yield break;
         }
 
-        //Forzamos color rojo por seguridad
+        // Forzamos color rojo por seguridad
         alarmLight.color = Color.red;
 
         while (alarmActive)
@@ -123,12 +127,12 @@ public class InjectionDoorController : MonoBehaviour
     #endregion
 
     #region Utilities
-    //Actualiza el TMP_Text con formato mm:ss. Recibe segundos (float)
+    // Actualiza el TMP_Text con formato mm:ss. Recibe segundos (float)
     void UpdateCountdown(float seconds)
     {
         if (countdownText == null) return;
         seconds = Mathf.Max(0f, seconds);
-        int total = Mathf.CeilToInt(seconds); //ceil para que el contador muestre 01:00 al inicio
+        int total = Mathf.CeilToInt(seconds); // ceil para que el contador muestre 01:00 al inicio
         int mm = total / 60;
         int ss = total % 60;
         countdownText.text = $"{mm:00}:{ss:00}";
