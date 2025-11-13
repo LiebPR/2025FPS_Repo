@@ -4,7 +4,6 @@ public class DoorSystem : MonoBehaviour
 {
     #region General Variables
     [SerializeField] bool isOpen = false; // Estado actual de la puerta
-    [SerializeField] float moveSpeed = 2f; // Velocidad de movimiento (si aún quieres animaciones suaves con velocidad controlable)
     #endregion
 
     #region References

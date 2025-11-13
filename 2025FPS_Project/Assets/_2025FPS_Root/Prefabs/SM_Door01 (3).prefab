@@ -30,6 +30,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8685954711514389913}
+  - {fileID: 8183708893517403466}
+  - {fileID: 4175650199793738395}
   - {fileID: 5874111665769985568}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -372,8 +374,6 @@ Transform:
   m_Children:
   - {fileID: 7500393003062973132}
   - {fileID: 8565947530833494518}
-  - {fileID: 8183708893517403466}
-  - {fileID: 4175650199793738395}
   m_Father: {fileID: 1734999914700891615}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!208 &4504924355262823005
@@ -447,8 +447,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36513cecdeb364c4f917d3141ac075bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  openHeight: 3
-  openDuration: 60
+  doorAnimator: {fileID: 0}
+  openAnimationTrigger: OpenDoor
   alarmLight: {fileID: 2687072426389996603}
   blinkInterval: 1.6
   countdownText: {fileID: 94328353942142789}
@@ -477,16 +477,16 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3661485556574289017}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -2.038}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.06}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 5874111665769985568}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Father: {fileID: 1734999914700891615}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -5.91, y: 1.885}
+  m_AnchoredPosition: {x: -5.049, y: 3.457}
   m_SizeDelta: {x: 3.5321, y: 0.743}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &1477648592498932173
@@ -554,7 +554,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 00:00
+  m_text: 01:00
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 2b61667ccf2910a4a9c24ea403d36acd, type: 2}
   m_sharedMaterial: {fileID: -8632279778186989986, guid: 2b61667ccf2910a4a9c24ea403d36acd, type: 2}
@@ -563,8 +563,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4286906112
-  m_fontColor: {r: 0, g: 1, b: 0.5162258, a: 1}
+    rgba: 4294967085
+  m_fontColor: {r: 0.1745283, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -707,12 +707,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5763300571019117716}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.88, y: 1.75, z: -5.78}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -3.88, y: 1.75, z: 4.82}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 5874111665769985568}
+  m_Father: {fileID: 1734999914700891615}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!108 &2687072426389996603
 Light:
@@ -725,7 +725,7 @@ Light:
   serializedVersion: 11
   m_Type: 2
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 1
+  m_Intensity: 2
   m_Range: 5.89503
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
