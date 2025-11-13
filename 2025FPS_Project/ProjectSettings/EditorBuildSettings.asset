@@ -5,9 +5,9 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: Assets/_2025FPS_Root/Desing/Scenes/SCN_AlejandroTest.unity
-    guid: 99c9720ab356a0642a771bea13969a05
+  - enabled: 1
+    path: Assets/_2025FPS_Root/Desing/Scenes/GameScene/SCN_Intro.unity
+    guid: c4659fbd31e3ffa4387a2af69850e3e5
   - enabled: 1
     path: Assets/_2025FPS_Root/Desing/Scenes/GameScene/SCN_MainMenu.unity
     guid: 3c28459f430219b4aa207a3baead62b0
