@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: SO_EnemyData
   m_EditorClassIdentifier: 
   debugLogs: 0
-  visionRadius: 5
+  visionRadius: 10
   visionAngle: 80
-  perceptionRadius: 2
+  perceptionRadius: 4
   obstacleMask:
     serializedVersion: 2
     m_Bits: 256
@@ -23,18 +23,19 @@ MonoBehaviour:
   minStopDistance: 3
   maxStopDistance: 4
   stopTransitionTime: 0.5
-  perceptionDelay: 0.5
+  perceptionDelay: 0.2
   lostDelay: 1
-  closeHearingRange: 5
-  mediumHearingRange: 10
+  closeHearingRange: 10
+  mediumHearingRange: 20
   longHearingRange: 50
   lostHearingDelay: 1
   groundLayer:
     serializedVersion: 2
     m_Bits: 8
+  angularSpeed: 120
   patrolSpeed: 2
   walkPointRange: 10
-  chaseSpeed: 5
+  chaseSpeed: 6
   idleTime: 1
   stuckCheckTime: 2
   stuckThreshold: 0.1

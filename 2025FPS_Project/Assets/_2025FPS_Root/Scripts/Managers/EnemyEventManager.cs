@@ -63,7 +63,6 @@ public class EnemyEventManager : MonoBehaviour
         if (AlarmActive)
         {
             fsm.OnChase();
-            return;
         }
 
     }

@@ -109,3 +109,7 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: fdef4de900fa89d4d95944b8cbfecbd4, type: 3}
     group: 2
     defaultVolume: 0.4
+  - id: MachinePassword
+    clip: {fileID: 8300000, guid: b6170a4e053b9fe48b20591664997ffa, type: 3}
+    group: 3
+    defaultVolume: 1
