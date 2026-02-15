@@ -128,7 +128,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   linkedDoor: {fileID: 0}
-  highlightMaterial: {fileID: 2100000, guid: 25e1f4d730f3b7a45892a0bc42adaa41, type: 2}
+  highlightMaterial: {fileID: 2100000, guid: 7363590d139b2924995b0b026542d4b2, type: 2}
 --- !u!95 &2139534095576089744
 Animator:
   serializedVersion: 7
