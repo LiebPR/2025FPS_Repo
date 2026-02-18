@@ -88,6 +88,9 @@ public class FPSController : MonoBehaviour
     #region Input Events Suscription
     private void OnEnable()
     {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
         InputManager.OnMoveEvent += HandleMove;
         InputManager.OnLookEvent += HandleLook;
         InputManager.OnCrouchEvent += HandleCrouch;
@@ -95,6 +98,8 @@ public class FPSController : MonoBehaviour
     }
     private void OnDisable()
     {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         InputManager.OnMoveEvent -= HandleMove;
         InputManager.OnLookEvent -= HandleLook;
         InputManager.OnCrouchEvent -= HandleCrouch;
@@ -104,20 +109,6 @@ public class FPSController : MonoBehaviour
 
     void Start()
     {
-        //Obtener el nombre de la escena actual 
-        string currentScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-        //Solo bloquear el cursor si estamos en una escena jugable
-        if (currentScene.StartsWith("SCN_AlejandroTask"))
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
-        else
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
-
         //Head bob: 
         camOriginalPos = camHolder.transform.localPosition;
     }

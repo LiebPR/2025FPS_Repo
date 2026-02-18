@@ -7,14 +7,14 @@ using System.Collections;
 public class IntroVideo : MonoBehaviour
 {
     [Header("Referencias")]
-    public VideoPlayer videoPlayer;
-    public Image fadeImage;
+    [SerializeField] VideoPlayer videoPlayer;
+    [SerializeField] Image fadeImage;
 
     [Header("Configuración")]
-    public string nextSceneName = "MainMenu";
-    public float fadeDuration = 1.5f; // segundos de fundido
+    [SerializeField] string nextSceneName = "MainMenu";
+    [SerializeField] float fadeDuration = 1.5f; // segundos de fundido
 
-    private bool hasFaded = false;
+    bool hasFaded = false;
 
     void Start()
     {
